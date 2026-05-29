@@ -85,10 +85,11 @@
   .img-preview { max-width: 250px; max-height: 200px; border-radius: 8px; margin-top: 8px; display: block; border: 1px solid #e5e7eb; }
   .img-preview-sm { max-width: 120px; max-height: 100px; border-radius: 6px; margin-left: 8px; vertical-align: middle; border: 1px solid #e5e7eb; }
   .option-row {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px;
     padding: 8px; background: #f9fafb; border-radius: 8px;
   }
-  .option-row input[type=text] { flex: 1; }
+  .option-row input[type=text] { flex: 1; min-width: 120px; }
+  .opt-img-settings { flex: 1 1 100%; margin-top: 4px; }
   .option-letter { font-weight: 700; width: 24px; }
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
@@ -128,7 +129,25 @@
   }
   .opt-long { margin-bottom: 0.45em; }
   .opt-letter-only .opt-lbl { width: auto; }
-  .opt-img { max-width: 120px; margin-top: 4px; display: block; border: 1px solid #e5e7eb; border-radius: 4px; }
+  .opt-img { max-width: 120px; border: 1px solid #e5e7eb; border-radius: 4px; }
+  .opt-pg-hang {
+    padding-left: 1.65em; text-indent: -1.65em;
+    line-height: 1.45; margin: 0.15em 0; max-width: 100%;
+    overflow-wrap: break-word; word-wrap: break-word; word-break: normal;
+  }
+  .opt-pg-hang img, .opt-pg-hang .opt-img { display: inline-block !important; vertical-align: middle; margin: 0; }
+  .q-inline-run { margin: 0 0 0.35em 0; text-align: left; line-height: 1.45; }
+  .q-head-run {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    max-width: 100%; flex-wrap: wrap; vertical-align: middle;
+  }
+  .q-head-run img, .q-head-run .q-head-img {
+    display: block; flex-shrink: 0; margin: 0; height: auto; max-height: 2.5em;
+  }
+  .q-head-txt { flex: 0 1 auto; min-width: 0; }
+  .q-inline-run img, .q-inline-run .q-img, .q-inline-run .q-inline-img {
+    display: inline-block !important; vertical-align: middle; margin: 0;
+  }
   .q-options-wrap { max-width: 100%; overflow: hidden; }
   .question-item { overflow: hidden; max-width: 100%; }
   .pg-format-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -141,10 +160,13 @@
   .img-settings input[type=text], .img-settings select { width: auto; min-width: 90px; padding: 6px 10px; font-size: 13px; }
   .q-img-wrap { margin: 8px 0; }
   .q-layout-below, .q-layout-above { display: flex; flex-direction: column; gap: 8px; }
-  .q-layout-left, .q-layout-right { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
-  .q-layout-right { flex-direction: row-reverse; }
-  .q-layout-left .q-img-wrap, .q-layout-right .q-img-wrap { flex: 0 0 auto; max-width: 45%; }
-  .q-layout-left .q-text-block, .q-layout-right .q-text-block { flex: 1; min-width: 160px; }
+  .q-image-preview-wrap {
+    margin-top: 8px; font-size: 14px; color: #374151; font-weight: 600;
+    line-height: 1.45; text-align: left;
+  }
+  .q-image-preview-wrap .q-head-run { display: inline-flex; align-items: center; gap: 0.4em; }
+  .q-image-preview-wrap img { display: block !important; flex-shrink: 0; max-height: 2.5em; }
+  .q-image-preview-wrap .q-preview-txt { font-weight: 600; }
   .opt-list-vertical { margin-top: 6px; padding-left: 4px; max-width: 100%; }
   .opt-vertical-item { margin: 0.2em 0; }
   @media(max-width:600px){
@@ -228,7 +250,7 @@
 
     <div class="field">
       <label>Pertanyaan</label>
-      <textarea id="questionText" placeholder="Tulis pertanyaan di sini..."></textarea>
+      <textarea id="questionText" placeholder="Teks pertanyaan (opsional jika hanya gambar)..."></textarea>
       <div class="img-controls" style="margin-top:8px;">
         <button type="button" class="btn btn-gray btn-sm" onclick="document.getElementById('qImageFile').click()">🖼️ Tambah Gambar</button>
         <button type="button" class="btn btn-red btn-sm" id="qImageRemove" style="display:none;" onclick="removeQImage()">Hapus Gambar</button>
@@ -245,9 +267,10 @@
           <option value="right">Kanan pertanyaan</option>
         </select>
       </div>
-      <div id="qImagePreviewWrap" class="q-layout-below" style="display:none;margin-top:8px;">
-        <img id="qImagePreview" class="img-preview" style="display:block;margin:0;">
-      </div>
+      <p id="qImagePreviewWrap" class="q-image-preview-wrap q-inline-run" style="display:none;">
+        <img id="qImagePreview" class="img-preview q-inline-img" alt="">
+        <span id="qImagePreviewText" class="q-preview-txt"></span>
+      </p>
     </div>
 
     <!-- Pilihan Ganda options -->
@@ -257,7 +280,7 @@
         <label><input type="radio" name="pgFormat" value="grid-acbd" checked> A|C / B|D &nbsp;(2 kolom)</label>
         <label><input type="radio" name="pgFormat" value="vertical"> A / B / C / D &nbsp;(vertikal)</label>
       </div>
-      <label style="margin-top:12px;">Pilihan Jawaban (klik radio untuk jawaban benar)</label>
+      <label style="margin-top:12px;">Pilihan Jawaban (teks atau gambar — klik radio untuk jawaban benar)</label>
       <div id="optionsContainer"></div>
       <button class="btn btn-gray btn-sm" onclick="addOption()" style="margin-top:6px;">➕ Tambah Pilihan</button>
     </div>
@@ -434,7 +457,7 @@ function openModal(type, editId=null) {
       setPgFormatRadio(getPgFormat(q));
       q.options.forEach((opt,i)=>{
         if (opt.image) optionImages[i] = opt.image;
-        addOption(opt.text, i===q.correct, opt.image);
+        addOption(opt.text, i===q.correct, opt.image, opt.imageWidth || 'auto');
       });
     } else if (type==='isian') {
       document.getElementById('isianAnswer').value = q.answer || '';
@@ -470,12 +493,27 @@ function getQImageWidthStyle() {
   return imageWidthToCss(document.getElementById('qImageWidth').value, '250px');
 }
 
-function updateQImagePreviewLayout() {
+function updateQImagePreviewLayout(imgSrc) {
   const wrap = document.getElementById('qImagePreviewWrap');
   if (!wrap || wrap.style.display === 'none') return;
-  wrap.className = 'q-layout-' + getQImagePosition();
-  const p = document.getElementById('qImagePreview');
-  if (p) p.style.cssText = 'display:block;margin:0;' + getQImageWidthStyle();
+  const pos = getQImagePosition();
+  const sample = document.getElementById('questionText').value.trim() || 'Teks pertanyaan';
+  const src = imgSrc || document.getElementById('qImagePreview')?.src || '';
+  const imgHtml = `<img id="qImagePreview" class="img-preview q-inline-img q-head-img" alt="" src="${src}" style="${getQImageWidthStyle()}display:inline-block;vertical-align:middle;">`;
+  const previewNum = '<b>1.</b>';
+  const previewText = escapeHtml(sample);
+
+  if (pos === 'left') {
+    wrap.innerHTML = `<span class="q-head-run">${previewNum} ${imgHtml}<span id="qImagePreviewText" class="q-preview-txt q-head-txt"> ${previewText}</span></span>`;
+  } else if (pos === 'right') {
+    wrap.innerHTML = `<span class="q-head-run"><span id="qImagePreviewText" class="q-preview-txt q-head-txt">${previewNum} ${previewText}</span> ${imgHtml}</span>`;
+  } else if (pos === 'above') {
+    wrap.innerHTML = `${imgHtml}<br><span id="qImagePreviewText" class="q-preview-txt">${escapeHtml(sample)}</span>`;
+  } else {
+    wrap.innerHTML = `<span id="qImagePreviewText" class="q-preview-txt">${escapeHtml(sample)}</span><br>${imgHtml}`;
+  }
+  wrap.className = 'q-image-preview-wrap q-inline-run';
+  wrap.style.display = 'block';
 }
 
 function resetQImageFields() {
@@ -488,13 +526,17 @@ function resetQImageFields() {
 }
 
 function showQImage(src){
-  const p = document.getElementById('qImagePreview');
-  p.src = src;
   document.getElementById('qImageRemove').style.display = 'inline-flex';
   document.getElementById('qImageSettings').style.display = 'flex';
   document.getElementById('qImagePreviewWrap').style.display = 'block';
-  updateQImagePreviewLayout();
+  updateQImagePreviewLayout(src);
   document.getElementById('qImageWidth').oninput = updateQImagePreviewLayout;
+  document.getElementById('qImagePosition').onchange = updateQImagePreviewLayout;
+  const qt = document.getElementById('questionText');
+  if (qt && !qt.dataset.imgPreviewBound) {
+    qt.dataset.imgPreviewBound = '1';
+    qt.addEventListener('input', updateQImagePreviewLayout);
+  }
 }
 
 function handleQImage(e){
@@ -520,68 +562,170 @@ function getQuestionImageStyle(q) {
   return imageWidthToCss(q.imageWidth);
 }
 
-function renderQuestionImageHtml(q, imgClass) {
+function getOptionImageStyle(o) {
+  return imageWidthToCss(o.imageWidth, '100%');
+}
+
+function renderOptionImageHtml(o, extraClass) {
+  if (!o.image) return '';
+  const cls = extraClass ? ` ${extraClass}` : '';
+  return `<img src="${o.image}" class="opt-img${cls}" style="${getOptionImageStyle(o)}display:inline-block;vertical-align:top;" alt="">`;
+}
+
+function renderQuestionImageTag(q, imgClass, asBlock) {
   if (!q.image) return '';
   const cls = imgClass || 'q-img';
-  const pos = q.imagePosition || 'below';
-  return `<div class="q-img-wrap q-img-pos-${pos}"><img src="${q.image}" class="${cls}" style="${getQuestionImageStyle(q)}" alt=""></div>`;
+  const disp = asBlock
+    ? 'display:block;margin:0.2em 0;'
+    : 'display:inline-block;vertical-align:middle;';
+  return `<img src="${q.image}" class="${cls} q-inline-img q-head-img" style="${getQuestionImageStyle(q)}${disp}" alt="">`;
 }
 
-function wrapQuestionContent(q, textHtml, extraBelow, imgClass) {
-  if (!q.image) return textHtml + (extraBelow || '');
+/** Header soal: kiri = 1. [gambar] teks | kanan = 1. teks [gambar] (sama pola opsi A.) */
+function renderQuestionHeaderHtml(q, num, imgClass) {
   const pos = q.imagePosition || 'below';
-  const img = renderQuestionImageHtml(q, imgClass || 'img-preview');
-  const block = `<div class="q-text-block">${textHtml}</div>`;
-  let inner;
-  if (pos === 'above') inner = img + block;
-  else if (pos === 'left') inner = img + block;
-  else if (pos === 'right') inner = block + img;
-  else inner = block + img;
-  return `<div class="q-layout-${pos}">${inner}</div>` + (extraBelow || '');
+  const t = (q.text || '').trim();
+  const numPart = num != null ? `<b>${num}.</b>` : '';
+  const textPart = t ? (num != null ? ` ${escapeHtml(t)}` : escapeHtml(t)) : '';
+
+  if (q.image && pos === 'left') {
+    const img = renderQuestionImageTag(q, imgClass, false);
+    const gap = numPart || textPart ? ' ' : '';
+    return `<p class="q-text q-inline-run"><span class="q-head-run">${numPart}${gap}${img}<span class="q-head-txt">${textPart}</span></span></p>`;
+  }
+  if (q.image && pos === 'right') {
+    const img = renderQuestionImageTag(q, imgClass, false);
+    return `<p class="q-text q-inline-run"><span class="q-head-run"><span class="q-head-txt">${numPart}${textPart}</span>${numPart || textPart ? ' ' : ''}${img}</span></p>`;
+  }
+  if (q.image && pos === 'above') {
+    const img = renderQuestionImageTag(q, imgClass, true);
+    return `${img}<p class="q-text">${numPart}${textPart}</p>`;
+  }
+  if (!q.image) {
+    if (num != null) return `<p class="q-text">${numPart}${textPart}</p>`;
+    if (!t) return '';
+    return `<div style="font-weight:600;margin-bottom:6px;">${escapeHtml(t)}</div>`;
+  }
+  const img = renderQuestionImageTag(q, imgClass, true);
+  return `<p class="q-text">${numPart}${textPart}</p>${img}`;
 }
 
-function addOption(text='', checked=false, image=null) {
+function renderPGOptionLine(o, oi, opts) {
+  const highlight = opts.highlight || false;
+  const correct = opts.correct != null ? opts.correct : -1;
+  const imgClass = opts.imgClass || '';
+  const letter = String.fromCharCode(65 + oi);
+  const text = (o.text || '').trim();
+  const img = o.image ? renderOptionImageHtml(o, imgClass) : '';
+  const tag = highlight && oi === correct ? '<span class="correct-tag"> ✓ Benar</span>' : '';
+  let content = '';
+  if (text) content += escapeHtml(text);
+  if (text && img) content += ' ';
+  content += img;
+  content += tag;
+  if (!content) content = '—';
+  return `<div class="opt-pg-hang"><b>${letter}.</b> ${content}</div>`;
+}
+
+function renderQuestionHeaderForCard(q) {
+  return renderQuestionHeaderHtml(q, null, 'img-preview');
+}
+
+function getOptionRowByIdx(idx) {
+  return [...document.querySelectorAll('.option-row')].find(r => parseInt(r.dataset.idx, 10) === idx);
+}
+
+function showOptImageSettings(row) {
+  const settings = row.querySelector('.opt-img-settings');
+  if (settings) settings.style.display = 'flex';
+}
+
+function addOption(text='', checked=false, image=null, imageWidth='auto') {
   const container = document.getElementById('optionsContainer');
   const idx = container.children.length;
   const letter = String.fromCharCode(65+idx);
   if (image) optionImages[idx] = image;
+  const w = normalizeImageWidth(imageWidth);
   const div = document.createElement('div');
   div.className = 'option-row';
   div.dataset.idx = idx;
   div.innerHTML = `
     <input type="radio" name="correctOpt" ${checked?'checked':''} value="${idx}">
     <span class="option-letter">${letter}.</span>
-    <input type="text" class="opt-text" placeholder="Teks pilihan" value="${escapeAttr(text)}">
-    <button class="btn btn-gray btn-sm" onclick="triggerOptImage(${idx})">🖼️</button>
-    <button class="btn btn-red btn-sm" onclick="removeOption(this)">✕</button>
+    <input type="text" class="opt-text" placeholder="Teks pilihan (opsional jika ada gambar)" value="${escapeAttr(text)}">
+    <button type="button" class="btn btn-gray btn-sm" onclick="triggerOptImage(${idx})">🖼️</button>
+    <button type="button" class="btn btn-red btn-sm" onclick="removeOption(this)">✕</button>
     <input type="file" accept="image/*" style="display:none" class="opt-img-file" onchange="handleOptImage(event,${idx})">
-    <img class="img-preview-sm opt-img-prev" style="${image?'':'display:none;'}" ${image?`src="${image}"`:''}>
+    <div class="opt-img-settings img-settings" style="${image?'':'display:none;'}">
+      <label>Lebar (px):</label>
+      <input type="text" class="opt-img-width" value="${escapeAttr(w)}" placeholder="auto" title="Angka atau auto">
+      <button type="button" class="btn btn-red btn-sm" onclick="removeOptImage(${idx})">Hapus Gambar</button>
+    </div>
+    <img class="img-preview-sm opt-img-prev" style="${image?'':'display:none;'}" ${image?`src="${image}"`:''} alt="">
   `;
   container.appendChild(div);
+  if (image) {
+    const row = getOptionRowByIdx(idx);
+    updateOptImagePreview(row);
+    const wInp = row.querySelector('.opt-img-width');
+    if (wInp) wInp.addEventListener('input', () => updateOptImagePreview(row));
+  }
+}
+function updateOptImagePreview(row) {
+  const prev = row.querySelector('.opt-img-prev');
+  const wInp = row.querySelector('.opt-img-width');
+  if (!prev || !prev.src || prev.style.display === 'none') return;
+  prev.style.cssText = 'display:block;margin-top:4px;' + getOptionImageStyle({ imageWidth: wInp?.value || 'auto' });
 }
 function triggerOptImage(idx){
-  const rows = document.querySelectorAll('.option-row');
-  rows.forEach(r=>{ if(parseInt(r.dataset.idx)===idx) r.querySelector('.opt-img-file').click(); });
+  const row = getOptionRowByIdx(idx);
+  if (row) row.querySelector('.opt-img-file').click();
 }
 function handleOptImage(e, idx){
   const file = e.target.files[0]; if(!file) return;
+  const row = getOptionRowByIdx(idx);
   const r = new FileReader();
   r.onload = ev => {
     optionImages[idx] = ev.target.result;
-    const row = [...document.querySelectorAll('.option-row')].find(x=>parseInt(x.dataset.idx)===idx);
     const prev = row.querySelector('.opt-img-prev');
-    prev.src = ev.target.result; prev.style.display='inline-block';
+    const wInp = row.querySelector('.opt-img-width');
+    prev.src = ev.target.result;
+    updateOptImagePreview(row);
+    if (wInp && !wInp.dataset.bound) {
+      wInp.dataset.bound = '1';
+      wInp.addEventListener('input', () => updateOptImagePreview(row));
+    }
+    showOptImageSettings(row);
   };
   r.readAsDataURL(file);
   e.target.value='';
 }
+function removeOptImage(idx) {
+  const row = getOptionRowByIdx(idx);
+  if (!row) return;
+  delete optionImages[idx];
+  const prev = row.querySelector('.opt-img-prev');
+  prev.src = '';
+  prev.style.display = 'none';
+  row.querySelector('.opt-img-settings').style.display = 'none';
+  const wInp = row.querySelector('.opt-img-width');
+  if (wInp) wInp.value = 'auto';
+  row.querySelector('.opt-img-file').value = '';
+}
 function removeOption(btn){
   const row = btn.closest('.option-row');
-  delete optionImages[parseInt(row.dataset.idx)];
+  delete optionImages[parseInt(row.dataset.idx, 10)];
   row.remove();
-  // relabel letters
   [...document.getElementById('optionsContainer').children].forEach((r,i)=>{
+    r.dataset.idx = i;
     r.querySelector('.option-letter').textContent = String.fromCharCode(65+i)+'.';
+    r.querySelector('input[type=radio]').value = i;
+    const file = r.querySelector('.opt-img-file');
+    file.setAttribute('onchange', `handleOptImage(event,${i})`);
+    const imgBtn = r.querySelector('.btn-gray');
+    if (imgBtn) imgBtn.setAttribute('onclick', `triggerOptImage(${i})`);
+    const rmImg = r.querySelector('.opt-img-settings .btn-red');
+    if (rmImg) rmImg.setAttribute('onclick', `removeOptImage(${i})`);
   });
 }
 
@@ -589,7 +733,7 @@ function saveQuestion(){
   const type = document.getElementById('questionType').value;
   const text = document.getElementById('questionText').value.trim();
   const editId = document.getElementById('editId').value;
-  if(!text){ alert('Pertanyaan tidak boleh kosong!'); return; }
+  if(!text && !currentQImage){ alert('Isi pertanyaan atau tambahkan gambar pertanyaan!'); return; }
 
   let q = { id: editId || ('q'+Date.now()), type, text, image: currentQImage };
   if (currentQImage) Object.assign(q, readQImageMetaFromForm());
@@ -600,11 +744,17 @@ function saveQuestion(){
     let opts = [], correct = -1;
     rows.forEach((r,i)=>{
       const t = r.querySelector('.opt-text').value.trim();
-      const idx = parseInt(r.dataset.idx);
-      opts.push({ text: t, image: optionImages[idx] || null });
+      const prev = r.querySelector('.opt-img-prev');
+      const hasImg = prev && prev.style.display !== 'none' && prev.src;
+      const imgW = normalizeImageWidth(r.querySelector('.opt-img-width')?.value || 'auto');
+      opts.push({
+        text: t,
+        image: hasImg ? prev.src : null,
+        imageWidth: hasImg ? imgW : undefined
+      });
       if(r.querySelector('input[type=radio]').checked) correct = i;
     });
-    if(opts.some(o=>!o.text && !o.image)){ alert('Pilihan tidak boleh kosong!'); return; }
+    if(opts.some(o=>!o.text && !o.image)){ alert('Setiap pilihan harus berisi teks atau gambar!'); return; }
     if(correct===-1){ alert('Pilih jawaban yang benar!'); return; }
     q.options = opts; q.correct = correct;
     q.pgFormat = document.querySelector('input[name="pgFormat"]:checked')?.value || PG_FORMAT_GRID;
@@ -675,7 +825,7 @@ function render(){
           <button class="btn btn-red btn-sm" onclick="deleteQuestion('${q.id}')">🗑️ Hapus</button>
         </div>
       </div>
-      ${wrapQuestionContent(q, `<div style="font-weight:600;margin-bottom:6px;">${escapeHtml(q.text)}</div>`, `<div class="q-options-wrap">${body}</div>`)}
+      ${renderQuestionHeaderForCard(q)}<div class="q-options-wrap">${body}</div>
     </div>`;
   }).join('');
 }
@@ -720,14 +870,16 @@ body{font-family:"Times New Roman",Times,serif;font-size:${s.fontSize}px;line-he
 }
 .section-title{font-weight:700;font-size:${sectionSize}px;margin:0.8em 0 0.5em 0;break-after:avoid;}
 .q{margin:0 0 ${s.questionGap}px 0;overflow:hidden;}
-.q-text{margin:0 0 0.2em 0;text-align:justify;}
+.q-text{margin:0 0 0.2em 0;text-align:left;}
+.q-inline-run{text-align:left;}
+.q-head-run{display:inline-flex;align-items:center;gap:0.4em;max-width:100%;flex-wrap:wrap;}
+.q-head-run img,.q-head-run .q-head-img{display:block;flex-shrink:0;margin:0;height:auto;max-height:2.5em;}
+.q-head-txt{flex:0 1 auto;min-width:0;}
+.q-inline-run img,.q-inline-run .q-img{display:inline-block!important;vertical-align:middle;}
 .q-img-wrap{display:block;margin:0.2em 0;}
-.q-img{height:auto;display:block;}
-.q-layout-below,.q-layout-above{display:flex;flex-direction:column;gap:0.35em;}
-.q-layout-left,.q-layout-right{display:flex;flex-wrap:wrap;align-items:flex-start;gap:0.5em;}
-.q-layout-right{flex-direction:row-reverse;}
-.q-layout-left .q-img-wrap,.q-layout-right .q-img-wrap{flex:0 0 auto;max-width:48%;}
-.q-layout-left .q-text-block,.q-layout-right .q-text-block{flex:1;min-width:120px;}
+.q-img{height:auto;}
+.opt-pg-hang{padding-left:1.65em;text-indent:-1.65em;line-height:1.35;margin:0.1em 0;word-break:normal;overflow-wrap:break-word;}
+.opt-pg-hang img,.opt-pg-hang .opt-img{display:inline-block!important;vertical-align:middle;margin:0;}
 .opt-grid-print{width:100%;margin:0.15em 0 0 0.35em;border-collapse:collapse;table-layout:fixed;}
 .opt-grid-print td{width:50%;vertical-align:top;padding:0.1em 0.5em 0.15em 0;overflow:hidden;
   word-wrap:break-word;word-break:break-all;overflow-wrap:anywhere;line-height:1.35;}
@@ -765,36 +917,22 @@ function wrapTextToLines(text, lineLen) {
 }
 
 function renderPGOptionCell(o, oi) {
-  const letter = String.fromCharCode(65 + oi);
-  const text = (o.text || '').trim();
-  const img = o.image ? `<img src="${o.image}" style="max-width:100%;height:auto;margin-top:4px;display:block;" alt="">` : '';
-  return `<div style="display:grid;grid-template-columns:1.65em minmax(0,1fr);column-gap:0.3em;line-height:1.35;max-width:100%;">
-    <span style="font-weight:700;">${letter}.</span>
-    <span style="min-width:0;overflow-wrap:break-word;word-wrap:break-word;word-break:normal;">${escapeHtml(text)}${img}</span>
-  </div>`;
+  return renderPGOptionLine(o, oi, {});
 }
 
-function renderPGOptionEntry(o, oi, correct, highlight, inTwoCol) {
-  const letter = String.fromCharCode(65 + oi);
-  const text = (o.text || '').trim();
+function renderPGOptionEntry(o, oi, correct, highlight) {
   const correctCls = highlight && oi === correct ? ' is-correct' : '';
-  const tag = highlight && oi === correct ? '<span class="correct-tag"> ✓ Benar</span>' : '';
-  const img = o.image ? `<img src="${o.image}" class="opt-img${highlight ? ' img-preview-sm' : ''}" alt="">` : '';
-  return `<div class="opt-entry opt-short${correctCls}">
-    <div class="opt-row">
-      <span class="opt-lbl">${letter}.</span>
-      <span class="opt-body">${escapeHtml(text)}${tag}${img}</span>
-    </div>
-  </div>`;
+  return `<div class="opt-entry opt-short${correctCls}">${renderPGOptionLine(o, oi, {
+    highlight, correct, imgClass: highlight ? ' img-preview-sm' : ''
+  })}</div>`;
 }
 
 function renderPrintQuestion(q, num) {
-  const qText = `<p class="q-text"><b>${num}. ${escapeHtml(q.text)}</b></p>`;
   let extra = '';
   if (q.type === 'pg') extra = renderPGOptionsBody(q, false);
   else if (q.type === 'isian') extra = `<div class="opt-answer">Jawaban:<span class="opt-dots"></span></div>`;
   else extra = `<div class="opt-esai-box"></div>`;
-  return `<div class="q">${wrapQuestionContent(q, qText, extra, 'q-img')}</div>`;
+  return `<div class="q">${renderQuestionHeaderHtml(q, num, 'q-img')}${extra}</div>`;
 }
 
 function collectPrintBlocks() {
@@ -856,8 +994,8 @@ function renderPGOptionsBody(q, highlight) {
       rows += `<td class="og-cell">${left[r] ? renderPGOptionCell(left[r], oiL) : ''}</td>`;
       rows += `<td class="og-cell og-cell-r">${right[r] ? renderPGOptionCell(right[r], oiR) : ''}</td>`;
     } else {
-      rows += `<td>${left[r] ? renderPGOptionEntry(left[r], oiL, q.correct, true, true) : ''}</td>`;
-      rows += `<td>${right[r] ? renderPGOptionEntry(right[r], oiR, q.correct, true, true) : ''}</td>`;
+      rows += `<td>${left[r] ? renderPGOptionEntry(left[r], oiL, q.correct, true) : ''}</td>`;
+      rows += `<td>${right[r] ? renderPGOptionEntry(right[r], oiR, q.correct, true) : ''}</td>`;
     }
     rows += '</tr>';
   }
