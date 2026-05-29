@@ -682,6 +682,7 @@ function printDocumentStyles() {
   const s = getPrintSettings();
   const paper = PAPER_SIZES[s.paper] || 'A4';
   const titleSize = Math.round(s.fontSize * 1.05);
+  const sectionSize = s.fontSize + 2;
   return `@page{size:${paper};margin:${s.marginTop}mm ${s.marginRight}mm ${s.marginBottom}mm ${s.marginLeft}mm;}
 @media print{
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -696,7 +697,7 @@ body{font-family:"Times New Roman",Times,serif;font-size:${s.fontSize}px;line-he
   column-fill:auto;-webkit-column-fill:auto;
   text-align:justify;
 }
-.section-title{font-weight:700;font-size:${s.fontSize}px;margin:0.8em 0 0.5em 0;break-after:avoid;}
+.section-title{font-weight:700;font-size:${sectionSize}px;margin:0.8em 0 0.5em 0;break-after:avoid;}
 .q{margin:0 0 ${s.questionGap}px 0;overflow:hidden;}
 .q-text{margin:0 0 0.2em 0;text-align:justify;}
 .q-img-wrap{display:block;margin:0.2em 0;}
@@ -712,9 +713,9 @@ body{font-family:"Times New Roman",Times,serif;font-size:${s.fontSize}px;line-he
 .opt-grid-print td.og-cell-r{padding-left:0.65em;}
 .opt-l{margin:0 0 0.05em 0;}
 .opt-t{margin:0 0 0.1em 0;text-align:justify;}
-.opt-answer{margin:0.15em 0 0 ${PG_INDENT};}
-.opt-dots{display:inline-block;min-width:10em;border-bottom:1px dotted #000;margin-left:0.2em;}
-.opt-esai-box{margin:0.3em 0 0 ${PG_INDENT};border-bottom:1px solid #000;min-height:3em;}
+.opt-answer{margin:0.15em 0 0 ${PG_INDENT};display:flex;align-items:flex-end;gap:1ch;}
+.opt-dots{flex:1;min-width:0;border-bottom:1px dotted #000;height:1em;}
+.opt-esai-box{margin:0.15em 0 0 ${PG_INDENT};border-bottom:1px solid #000;min-height:0;height:1em;}
 .opt-list-vertical{margin:0.15em 0 0 0.35em;}
 .opt-vertical-item{margin:0.12em 0;overflow:hidden;word-break:break-all;}`;
 }
