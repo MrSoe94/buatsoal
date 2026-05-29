@@ -32,7 +32,7 @@
   .toolbar-row + .toolbar-row {
     margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;
   }
-  .toolbar-font { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+  .toolbar-font { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
   .toolbar-font input { width: 56px; padding: 6px 8px; text-align: center; }
   .print-settings-row { gap: 8px 14px; font-size: 13px; }
   .print-settings-row label { font-weight: 600; white-space: nowrap; }
@@ -177,11 +177,7 @@
       <button class="btn btn-gray" onclick="document.getElementById('importFile').click()">📂 Import JSON</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
       <button class="btn btn-gray" onclick="printQuestions()">🖨️ Cetak / Preview</button>
-      <div class="toolbar-font">
-        <label for="printFontSize">Font:</label>
-        <input type="number" id="printFontSize" min="8" max="28" value="16">
-        <span style="font-weight:normal;color:#6b7280;">px</span>
-      </div>
+      <button class="btn btn-red" onclick="resetApp()">♻️ Reset Aplikasi</button>
     </div>
     <div class="toolbar-row print-settings-row">
       <label for="printPaper">Kertas:</label>
@@ -201,6 +197,11 @@
       </div>
       <label for="printQuestionGap">Jarak Soal (px):</label>
       <input type="number" id="printQuestionGap" min="0" max="80" value="1">
+      <div class="toolbar-font">
+        <label for="printFontSize">Font:</label>
+        <input type="number" id="printFontSize" min="8" max="28" value="16">
+        <span style="font-weight:normal;color:#6b7280;">px</span>
+      </div>
     </div>
   </div>
 
@@ -355,6 +356,26 @@ function getPrintSettings() {
 }
 
 const PAPER_SIZES = { A4: 'A4', A5: 'A5', Letter: 'letter', Legal: 'legal', F4: '216mm 330mm' };
+
+function resetApp() {
+  const ok = confirm(
+    'Reset aplikasi akan menghapus semua data yang tersimpan (bank soal + pengaturan cetak) di browser ini.\n\nLanjutkan?'
+  );
+  if (!ok) return;
+  try {
+    localStorage.removeItem('soal_data');
+    localStorage.removeItem('soal_print_settings');
+  } catch (e) {
+    // ignore
+  }
+  questions = [];
+  printSettings = { ...DEFAULT_PRINT_SETTINGS };
+  applyPrintSettingsToUI();
+  save();
+  render();
+  // Reload untuk memastikan state benar-benar bersih
+  location.reload();
+}
 
 const typeLabel = { pg:'Pilihan Ganda', isian:'Isian', esai:'Esai' };
 const badgeClass = { pg:'badge-pg', isian:'badge-isian', esai:'badge-esai' };
