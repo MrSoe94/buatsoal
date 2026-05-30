@@ -150,6 +150,10 @@
     display: inline-block !important; vertical-align: middle; margin: 0;
   }
   .q-options-wrap { max-width: 100%; overflow: hidden; padding-left: 1.15em; box-sizing: border-box; }
+  .q-head-block { margin: 0 0 0.35em 0; max-width: 100%; }
+  .q-head-row { margin: 0.1em 0; }
+  .q-num-spacer { visibility: hidden; pointer-events: none; user-select: none; }
+  .q-head-img-wrap img { display: block !important; margin: 0; height: auto; }
   .question-item { overflow: hidden; max-width: 100%; }
   .pg-format-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   .pg-format-opts label { font-weight: normal; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
@@ -1076,17 +1080,20 @@ function updateQImagePreviewLayout(imgSrc) {
   const sample = document.getElementById('questionText').value.trim() || 'Teks pertanyaan';
   const src = imgSrc || document.getElementById('qImagePreview')?.src || '';
   const imgHtml = `<img id="qImagePreview" class="img-preview q-inline-img q-head-img" alt="" src="${src}" style="${getQImageWidthStyle()}display:inline-block;vertical-align:middle;">`;
-  const previewNum = '<b>1.</b>';
   const previewText = escapeHtml(sample);
+  const previewNumLbl = '<span class="opt-lbl q-num-lbl"><b>1.</b></span>';
+  const previewSpacer = '<span class="opt-lbl q-num-lbl q-num-spacer" aria-hidden="true"><b>1.</b></span>';
+  const previewTextBody = `<span id="qImagePreviewText" class="q-preview-txt opt-body q-head-txt">${previewText}</span>`;
+  const imgWrap = `<span class="opt-body q-head-img-wrap">${imgHtml}</span>`;
 
   if (pos === 'left') {
-    wrap.innerHTML = `<span class="q-head-run">${previewNum} ${imgHtml}<span id="qImagePreviewText" class="q-preview-txt q-head-txt"> ${previewText}</span></span>`;
+    wrap.innerHTML = `<span class="q-head-run">${previewNumLbl} ${imgHtml}<span id="qImagePreviewText" class="q-preview-txt q-head-txt"> ${previewText}</span></span>`;
   } else if (pos === 'right') {
-    wrap.innerHTML = `<span class="q-head-run"><span id="qImagePreviewText" class="q-preview-txt q-head-txt">${previewNum} ${previewText}</span> ${imgHtml}</span>`;
+    wrap.innerHTML = `<span class="q-head-run"><span id="qImagePreviewText" class="q-preview-txt q-head-txt">${previewNumLbl} ${previewText}</span> ${imgHtml}</span>`;
   } else if (pos === 'above') {
-    wrap.innerHTML = `${imgHtml}<br><span id="qImagePreviewText" class="q-preview-txt">${escapeHtml(sample)}</span>`;
+    wrap.innerHTML = `<div class="q-head-block"><div class="opt-row q-head-row">${previewSpacer}${imgWrap}</div><div class="opt-row q-head-row">${previewNumLbl}${previewTextBody}</div></div>`;
   } else {
-    wrap.innerHTML = `<span id="qImagePreviewText" class="q-preview-txt">${escapeHtml(sample)}</span><br>${imgHtml}`;
+    wrap.innerHTML = `<div class="q-head-block"><div class="opt-row q-head-row">${previewNumLbl}${previewTextBody}</div><div class="opt-row q-head-row">${previewSpacer}${imgWrap}</div></div>`;
   }
   wrap.className = 'q-image-preview-wrap q-inline-run';
   wrap.style.display = 'block';
@@ -1157,6 +1164,23 @@ function renderQuestionImageTag(q, imgClass, asBlock) {
   return `<img src="${q.image}" class="${cls} q-inline-img q-head-img" style="${getQuestionImageStyle(q)}${disp}" alt="">`;
 }
 
+/** Gambar atas/bawah: sejajar dengan teks setelah nomor (pola grid seperti opsi A.) */
+function renderQuestionStackedHeader(q, num, imgClass, imgFirst) {
+  const t = (q.text || '').trim();
+  const img = renderQuestionImageTag(q, imgClass, true);
+  if (num == null) {
+    const textHtml = t ? `<div style="font-weight:600;margin-bottom:6px;">${escapeHtml(t)}</div>` : '';
+    return imgFirst ? `${img}${textHtml}` : `${textHtml}${img}`;
+  }
+  const numLbl = `<span class="opt-lbl q-num-lbl"><b>${num}.</b></span>`;
+  const spacer = `<span class="opt-lbl q-num-lbl q-num-spacer" aria-hidden="true"><b>${num}.</b></span>`;
+  const textBody = `<span class="opt-body q-head-txt">${t ? escapeHtml(t) : ''}</span>`;
+  const textRow = `<div class="opt-row q-head-row">${numLbl}${textBody}</div>`;
+  const imgRow = `<div class="opt-row q-head-row">${spacer}<span class="opt-body q-head-img-wrap">${img}</span></div>`;
+  const inner = imgFirst ? imgRow + textRow : textRow + imgRow;
+  return `<div class="q-head-block">${inner}</div>`;
+}
+
 /** Header soal: kiri = 1. [gambar] teks | kanan = 1. teks [gambar] (sama pola opsi A.) */
 function renderQuestionHeaderHtml(q, num, imgClass) {
   const pos = q.imagePosition || 'below';
@@ -1174,16 +1198,14 @@ function renderQuestionHeaderHtml(q, num, imgClass) {
     return `<p class="q-text q-inline-run"><span class="q-head-run"><span class="q-head-txt">${numPart}${textPart}</span>${numPart || textPart ? ' ' : ''}${img}</span></p>`;
   }
   if (q.image && pos === 'above') {
-    const img = renderQuestionImageTag(q, imgClass, true);
-    return `${img}<p class="q-text">${numPart}${textPart}</p>`;
+    return renderQuestionStackedHeader(q, num, imgClass, true);
   }
   if (!q.image) {
     if (num != null) return `<p class="q-text">${numPart}${textPart}</p>`;
     if (!t) return '';
     return `<div style="font-weight:600;margin-bottom:6px;">${escapeHtml(t)}</div>`;
   }
-  const img = renderQuestionImageTag(q, imgClass, true);
-  return `<p class="q-text">${numPart}${textPart}</p>${img}`;
+  return renderQuestionStackedHeader(q, num, imgClass, false);
 }
 
 function renderPGOptionLine(o, oi, opts) {
@@ -1459,6 +1481,10 @@ ${kopCss}
 .q-head-run{display:inline-flex;align-items:center;gap:0.4em;max-width:100%;flex-wrap:wrap;}
 .q-head-run img,.q-head-run .q-head-img{display:block;flex-shrink:0;margin:0;height:auto;max-height:2.5em;}
 .q-head-txt{flex:0 1 auto;min-width:0;}
+.q-head-block{margin:0 0 0.2em 0;max-width:100%;}
+.q-head-row{margin:0.1em 0;}
+.q-num-spacer{visibility:hidden;pointer-events:none;user-select:none;}
+.q-head-img-wrap img{display:block!important;margin:0;height:auto;}
 .q-inline-run img,.q-inline-run .q-img{display:inline-block!important;vertical-align:middle;}
 .q-img-wrap{display:block;margin:0.2em 0;}
 .q-img{height:auto;}
