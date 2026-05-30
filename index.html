@@ -41,6 +41,12 @@
     width: auto; min-width: 0; padding: 6px 8px; font-size: 13px;
   }
   .print-settings-row input[type=number] { width: 52px; text-align: center; }
+  .btn-help {
+    width: 28px; height: 28px; padding: 0; border-radius: 50%;
+    background: #dbeafe; color: #1d4ed8; font-size: 14px; font-weight: 700;
+    border: 1px solid #93c5fd; cursor: pointer; flex-shrink: 0;
+  }
+  .btn-help:hover { background: #bfdbfe; }
   .margin-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
   .margin-group span { font-size: 12px; color: #4b5563; }
   .btn {
@@ -226,6 +232,7 @@
         <option value="Legal">Legal</option>
         <option value="F4">F4</option>
       </select>
+      <button type="button" class="btn-help" onclick="showPrintPaperHint()" title="Petunjuk ukuran kertas saat cetak">?</button>
       <label>Margin (mm):</label>
       <div class="margin-group">
         <span>Atas</span><input type="number" id="printMarginTop" min="0" max="50" value="6">
@@ -911,12 +918,38 @@ function getPrintSettings() {
 }
 
 const PAPER_PRESETS = {
-  A4:     { pageSize: '210mm 297mm',  w: 210, h: 297, dialog: 'A4' },
-  A5:     { pageSize: '148mm 210mm',  w: 148, h: 210, dialog: 'A5' },
-  Letter: { pageSize: '215.9mm 279.4mm', w: 216, h: 279, dialog: 'Letter / US Letter' },
-  Legal:  { pageSize: '215.9mm 355.6mm', w: 216, h: 356, dialog: 'Legal' },
-  F4:     { pageSize: '210mm 330mm',  w: 210, h: 330, dialog: 'F4 / Folio (210×330 mm)' }
+  A4:     { pageSize: '210mm 297mm',  w: 210, h: 297, dialog: 'A4', printPick: 'A4' },
+  A5:     { pageSize: '148mm 210mm',  w: 148, h: 210, dialog: 'A5', printPick: 'A5' },
+  Letter: { pageSize: '215.9mm 279.4mm', w: 216, h: 279, dialog: 'Letter / US Letter', printPick: 'Letter (8,5 × 11 in)' },
+  Legal:  { pageSize: '215.9mm 355.6mm', w: 216, h: 356, dialog: 'Legal', printPick: 'Legal (8,5 × 14 in)' },
+  F4:     { pageSize: '210mm 330mm',  w: 210, h: 330, dialog: 'F4 / Folio (210×330 mm)', printPick: '8,5 × 13 in (F4 / Folio)' }
 };
+
+function getPrintDialogHint(paperKey) {
+  const p = getPaperPreset(paperKey);
+  return p.printPick || p.dialog;
+}
+
+function showPrintPaperHint() {
+  const paper = document.getElementById('printPaper').value || 'A4';
+  const p = getPaperPreset(paper);
+  let msg = 'PETUNJUK CETAK — UKURAN KERTAS\n\n';
+  msg += 'Layout soal disesuaikan dengan pilihan "Kertas" di toolbar.\n';
+  msg += 'Saat dialog cetak browser muncul, pilih ukuran kertas yang sama.\n\n';
+  if (paper === 'F4') {
+    msg += 'Untuk kertas F4 (210 × 330 mm):\n';
+    msg += '• Pilih ukuran: 8,5 × 13 inci\n';
+    msg += '  (bisa berlabel "F4", "Folio", "8.5 x 13 in", atau sejenisnya)\n';
+    msg += '• Orientasi: Portrait\n';
+    msg += '• Skala: 100% (hindari "Fit to page" jika memungkinkan)\n';
+  } else {
+    msg += 'Untuk ' + p.dialog + ':\n';
+    msg += '• Pilih: ' + getPrintDialogHint(paper) + '\n';
+    msg += '• Orientasi: Portrait\n';
+    msg += '• Skala: 100%';
+  }
+  alert(msg);
+}
 
 function getPaperPreset(key) {
   return PAPER_PRESETS[key] || PAPER_PRESETS.A4;
@@ -1217,8 +1250,10 @@ function addOption(text='', checked=false, image=null, imageWidth='auto') {
 function updateOptImagePreview(row) {
   const prev = row.querySelector('.opt-img-prev');
   const wInp = row.querySelector('.opt-img-width');
-  if (!prev || !prev.src || prev.style.display === 'none') return;
-  prev.style.cssText = 'display:block;margin-top:4px;' + getOptionImageStyle({ imageWidth: wInp?.value || 'auto' });
+  const src = optionImages[parseInt(row.dataset.idx, 10)] || prev?.getAttribute('src') || '';
+  if (!prev || !src) return;
+  prev.src = src;
+  prev.style.cssText = 'display:block;flex:1 1 100%;margin-top:4px;' + getOptionImageStyle({ imageWidth: wInp?.value || 'auto' });
 }
 function triggerOptImage(idx){
   const row = getOptionRowByIdx(idx);
@@ -1230,15 +1265,13 @@ function handleOptImage(e, idx){
   const r = new FileReader();
   r.onload = ev => {
     optionImages[idx] = ev.target.result;
-    const prev = row.querySelector('.opt-img-prev');
     const wInp = row.querySelector('.opt-img-width');
-    prev.src = ev.target.result;
+    showOptImageSettings(row);
     updateOptImagePreview(row);
     if (wInp && !wInp.dataset.bound) {
       wInp.dataset.bound = '1';
       wInp.addEventListener('input', () => updateOptImagePreview(row));
     }
-    showOptImageSettings(row);
   };
   r.readAsDataURL(file);
   e.target.value='';
@@ -1287,13 +1320,12 @@ function saveQuestion(){
     let opts = [], correct = -1;
     rows.forEach((r,i)=>{
       const t = r.querySelector('.opt-text').value.trim();
-      const prev = r.querySelector('.opt-img-prev');
-      const hasImg = prev && prev.style.display !== 'none' && prev.src;
+      const imgData = optionImages[i] || null;
       const imgW = normalizeImageWidth(r.querySelector('.opt-img-width')?.value || 'auto');
       opts.push({
         text: t,
-        image: hasImg ? prev.src : null,
-        imageWidth: hasImg ? imgW : undefined
+        image: imgData,
+        imageWidth: imgData ? imgW : undefined
       });
       if(r.querySelector('input[type=radio]').checked) correct = i;
     });
@@ -1733,9 +1765,10 @@ function printQuestions(){
   if (!ensureExportReady()) return;
   const p = getPaperPreset(printSettings.paper);
   if (printSettings.paper !== 'A4') {
+    const pick = getPrintDialogHint(printSettings.paper);
     const ok = confirm(
       'Ukuran kertas aplikasi: ' + p.dialog + '.\n\n' +
-      'Di dialog cetak browser, pilih ukuran kertas yang SAMA (mis. F4/Folio).\n\nLanjutkan cetak?'
+      'Di dialog cetak browser, pilih ukuran kertas: ' + pick + '.\n\nLanjutkan cetak?'
     );
     if (!ok) return;
   }
