@@ -152,6 +152,12 @@
   .q-options-wrap { max-width: 100%; overflow: hidden; padding-left: 1.15em; box-sizing: border-box; }
   .q-head-block { margin: 0 0 0.35em 0; max-width: 100%; }
   .q-head-row { margin: 0.1em 0; }
+  .q-line-table { width: 100%; max-width: 100%; border-collapse: collapse; border: none; table-layout: fixed; margin: 0.1em 0; }
+  .q-line-table td { border: none; padding: 0; vertical-align: top; }
+  .q-num-cell { width: 1%; white-space: nowrap; font-weight: 700; padding-right: 0.35em; vertical-align: top; }
+  .q-num-cell.q-num-spacer { visibility: hidden; pointer-events: none; user-select: none; }
+  .q-text-cell { text-align: justify; line-height: 1.45; word-wrap: break-word; overflow-wrap: break-word; word-break: normal; }
+  .q-text-row { margin: 0 0 0.2em 0; }
   .q-num-spacer { visibility: hidden; pointer-events: none; user-select: none; }
   .q-head-img-wrap img { display: block !important; margin: 0; height: auto; }
   .question-item { overflow: hidden; max-width: 100%; }
@@ -1081,19 +1087,19 @@ function updateQImagePreviewLayout(imgSrc) {
   const src = imgSrc || document.getElementById('qImagePreview')?.src || '';
   const imgHtml = `<img id="qImagePreview" class="img-preview q-inline-img q-head-img" alt="" src="${src}" style="${getQImageWidthStyle()}display:inline-block;vertical-align:middle;">`;
   const previewText = escapeHtml(sample);
-  const previewNumLbl = '<span class="opt-lbl q-num-lbl"><b>1.</b></span>';
-  const previewSpacer = '<span class="opt-lbl q-num-lbl q-num-spacer" aria-hidden="true"><b>1.</b></span>';
-  const previewTextBody = `<span id="qImagePreviewText" class="q-preview-txt opt-body q-head-txt">${previewText}</span>`;
-  const imgWrap = `<span class="opt-body q-head-img-wrap">${imgHtml}</span>`;
+  const textRow = buildQuestionLineTable(1, `<span id="qImagePreviewText" class="q-preview-txt">${previewText}</span>`, 'q-head-row', false);
+  const imgRow = buildQuestionLineTable(1, `<span class="q-head-img-wrap">${imgHtml}</span>`, 'q-head-row', true);
 
   if (pos === 'left') {
+    const previewNumLbl = '<span class="opt-lbl q-num-lbl"><b>1.</b></span>';
     wrap.innerHTML = `<span class="q-head-run">${previewNumLbl} ${imgHtml}<span id="qImagePreviewText" class="q-preview-txt q-head-txt"> ${previewText}</span></span>`;
   } else if (pos === 'right') {
+    const previewNumLbl = '<span class="opt-lbl q-num-lbl"><b>1.</b></span>';
     wrap.innerHTML = `<span class="q-head-run"><span id="qImagePreviewText" class="q-preview-txt q-head-txt">${previewNumLbl} ${previewText}</span> ${imgHtml}</span>`;
   } else if (pos === 'above') {
-    wrap.innerHTML = `<div class="q-head-block"><div class="opt-row q-head-row">${previewSpacer}${imgWrap}</div><div class="opt-row q-head-row">${previewNumLbl}${previewTextBody}</div></div>`;
+    wrap.innerHTML = `<div class="q-head-block">${imgRow}${textRow}</div>`;
   } else {
-    wrap.innerHTML = `<div class="q-head-block"><div class="opt-row q-head-row">${previewNumLbl}${previewTextBody}</div><div class="opt-row q-head-row">${previewSpacer}${imgWrap}</div></div>`;
+    wrap.innerHTML = `<div class="q-head-block">${textRow}${imgRow}</div>`;
   }
   wrap.className = 'q-image-preview-wrap q-inline-run';
   wrap.style.display = 'block';
@@ -1164,6 +1170,21 @@ function renderQuestionImageTag(q, imgClass, asBlock) {
   return `<img src="${q.image}" class="${cls} q-inline-img q-head-img" style="${getQuestionImageStyle(q)}${disp}" alt="">`;
 }
 
+function buildQuestionLineTable(num, bodyHtml, extraClass = '', spacer = false) {
+  const numCell = `<td class="q-num-cell${spacer ? ' q-num-spacer' : ''}"><b>${num}.</b></td>`;
+  const cls = extraClass ? ` q-line-table ${extraClass}` : ' q-line-table';
+  return `<table class="${cls.trim()}" role="presentation"><tr>${numCell}<td class="q-text-cell">${bodyHtml}</td></tr></table>`;
+}
+
+function buildQuestionTextRow(num, text) {
+  const t = (text || '').trim();
+  return buildQuestionLineTable(num, t ? escapeHtml(t) : '', 'q-text-row', false);
+}
+
+function buildQuestionSpacerRow(num, bodyHtml, extraClass = 'q-head-row') {
+  return buildQuestionLineTable(num, bodyHtml, extraClass, true);
+}
+
 /** Gambar atas/bawah: sejajar dengan teks setelah nomor (pola grid seperti opsi A.) */
 function renderQuestionStackedHeader(q, num, imgClass, imgFirst) {
   const t = (q.text || '').trim();
@@ -1172,11 +1193,8 @@ function renderQuestionStackedHeader(q, num, imgClass, imgFirst) {
     const textHtml = t ? `<div style="font-weight:600;margin-bottom:6px;">${escapeHtml(t)}</div>` : '';
     return imgFirst ? `${img}${textHtml}` : `${textHtml}${img}`;
   }
-  const numLbl = `<span class="opt-lbl q-num-lbl"><b>${num}.</b></span>`;
-  const spacer = `<span class="opt-lbl q-num-lbl q-num-spacer" aria-hidden="true"><b>${num}.</b></span>`;
-  const textBody = `<span class="opt-body q-head-txt">${t ? escapeHtml(t) : ''}</span>`;
-  const textRow = `<div class="opt-row q-head-row">${numLbl}${textBody}</div>`;
-  const imgRow = `<div class="opt-row q-head-row">${spacer}<span class="opt-body q-head-img-wrap">${img}</span></div>`;
+  const textRow = buildQuestionTextRow(num, t);
+  const imgRow = buildQuestionSpacerRow(num, `<span class="q-head-img-wrap">${img}</span>`);
   const inner = imgFirst ? imgRow + textRow : textRow + imgRow;
   return `<div class="q-head-block">${inner}</div>`;
 }
@@ -1201,7 +1219,7 @@ function renderQuestionHeaderHtml(q, num, imgClass) {
     return renderQuestionStackedHeader(q, num, imgClass, true);
   }
   if (!q.image) {
-    if (num != null) return `<p class="q-text">${numPart}${textPart}</p>`;
+    if (num != null) return buildQuestionTextRow(num, t);
     if (!t) return '';
     return `<div style="font-weight:600;margin-bottom:6px;">${escapeHtml(t)}</div>`;
   }
@@ -1433,7 +1451,6 @@ function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
 const PG_LONG_CHARS = 20;
 const PG_LINE_COL = 26;
 const PG_LINE_STACK = 32;
-const PG_INDENT = '1.35em';
 const PG_OPT_MARGIN_LEFT = '1.15em';
 
 function pgOptionStylesScreen() {
@@ -1483,6 +1500,11 @@ ${kopCss}
 .q-head-txt{flex:0 1 auto;min-width:0;}
 .q-head-block{margin:0 0 0.2em 0;max-width:100%;}
 .q-head-row{margin:0.1em 0;}
+.q-line-table{width:100%;max-width:100%;border-collapse:collapse;border:none;table-layout:fixed;margin:0.1em 0;}
+.q-line-table td{border:none;padding:0;vertical-align:top;}
+.q-num-cell{width:1%;white-space:nowrap;font-weight:700;padding-right:0.35em;vertical-align:top;}
+.q-num-cell.q-num-spacer{visibility:hidden;pointer-events:none;user-select:none;}
+.q-text-cell{text-align:justify;line-height:1.35;word-wrap:break-word;overflow-wrap:break-word;word-break:normal;}
 .q-num-spacer{visibility:hidden;pointer-events:none;user-select:none;}
 .q-head-img-wrap img{display:block!important;margin:0;height:auto;}
 .q-inline-run img,.q-inline-run .q-img{display:inline-block!important;vertical-align:middle;}
@@ -1498,9 +1520,11 @@ ${kopCss}
 .opt-grid-print td.og-cell-r{padding-left:0.85em;}
 .opt-l{margin:0 0 0.05em 0;}
 .opt-t{margin:0 0 0.1em 0;text-align:justify;}
-.opt-answer{margin:0.15em 0 0 ${PG_INDENT};display:flex;align-items:flex-end;gap:1ch;}
+.q-text-row{margin:0 0 0.2em 0;}
+.q-answer-row{margin:0.1em 0 0;}
+.opt-answer{display:flex;align-items:flex-end;gap:1ch;margin:0.15em 0 0;}
 .opt-dots{flex:1;min-width:0;border-bottom:1px dotted #000;height:1em;}
-.opt-esai-box{margin:0.15em 0 0 ${PG_INDENT};border-bottom:1px solid #000;min-height:0;height:1em;}
+.opt-esai-box{border-bottom:1px solid #000;min-height:0;height:1em;margin:0.15em 0 0;}
 .opt-list-vertical{margin:0.15em 0 0 ${PG_OPT_MARGIN_LEFT};}
 .opt-vertical-item{margin:0.12em 0;overflow:hidden;word-break:break-all;}
 .export-cols{width:100%;border-collapse:collapse;table-layout:fixed;}
@@ -1545,8 +1569,11 @@ function renderPGOptionEntry(o, oi, correct, highlight) {
 function renderPrintQuestion(q, num) {
   let extra = '';
   if (q.type === 'pg') extra = renderPGOptionsBody(q, false);
-  else if (q.type === 'isian') extra = `<div class="opt-answer">Jawaban:<span class="opt-dots"></span></div>`;
-  else extra = `<div class="opt-esai-box"></div>`;
+  else if (q.type === 'isian') {
+    extra = buildQuestionSpacerRow(num, `<div class="opt-answer">Jawaban:<span class="opt-dots"></span></div>`, 'q-answer-row');
+  } else {
+    extra = buildQuestionSpacerRow(num, `<div class="opt-esai-box"></div>`, 'q-answer-row');
+  }
   return `<div class="q">${renderQuestionHeaderHtml(q, num, 'q-img')}${extra}</div>`;
 }
 
