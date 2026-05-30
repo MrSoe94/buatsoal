@@ -118,8 +118,8 @@
   .opt-entry { margin: 0.2em 0; min-width: 0; max-width: 100%; overflow: hidden; }
   .opt-entry.is-correct { background: #f0fdf4; border-radius: 6px; padding: 2px 6px; }
   .opt-row {
-    display: grid; grid-template-columns: 1.65em minmax(0, 1fr);
-    column-gap: 0.3em; line-height: 1.45; max-width: 100%;
+    display: grid; grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.25em; line-height: 1.45; max-width: 100%;
   }
   .opt-lbl { font-weight: 700; }
   .opt-body {
@@ -130,12 +130,7 @@
   .opt-long { margin-bottom: 0.45em; }
   .opt-letter-only .opt-lbl { width: auto; }
   .opt-img { max-width: 120px; border: 1px solid #e5e7eb; border-radius: 4px; }
-  .opt-pg-hang {
-    padding-left: 1.65em; text-indent: -1.65em;
-    line-height: 1.45; margin: 0.15em 0; max-width: 100%;
-    overflow-wrap: break-word; word-wrap: break-word; word-break: normal;
-  }
-  .opt-pg-hang img, .opt-pg-hang .opt-img { display: inline-block !important; vertical-align: middle; margin: 0; }
+  .opt-row img, .opt-row .opt-img { display: inline-block !important; vertical-align: middle; margin: 0; }
   .q-inline-run { margin: 0 0 0.35em 0; text-align: left; line-height: 1.45; }
   .q-head-run {
     display: inline-flex; align-items: center; gap: 0.4em;
@@ -148,7 +143,7 @@
   .q-inline-run img, .q-inline-run .q-img, .q-inline-run .q-inline-img {
     display: inline-block !important; vertical-align: middle; margin: 0;
   }
-  .q-options-wrap { max-width: 100%; overflow: hidden; }
+  .q-options-wrap { max-width: 100%; overflow: hidden; padding-left: 1.15em; box-sizing: border-box; }
   .question-item { overflow: hidden; max-width: 100%; }
   .pg-format-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   .pg-format-opts label { font-weight: normal; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
@@ -167,8 +162,26 @@
   .q-image-preview-wrap .q-head-run { display: inline-flex; align-items: center; gap: 0.4em; }
   .q-image-preview-wrap img { display: block !important; flex-shrink: 0; max-height: 2.5em; }
   .q-image-preview-wrap .q-preview-txt { font-weight: 600; }
-  .opt-list-vertical { margin-top: 6px; padding-left: 4px; max-width: 100%; }
+  .opt-list-vertical { margin-top: 6px; padding-left: 0; max-width: 100%; }
   .opt-vertical-item { margin: 0.2em 0; }
+  .modal.modal-kop { max-width: 720px; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; }
+  .kop-modal-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .kop-modal-top label { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .kop-modal-stack { display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0; overflow: hidden; }
+  .kop-form-panel { overflow-y: auto; max-height: 52vh; padding-right: 4px; }
+  .kop-form-panel h3 { font-size: 14px; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #e5e7eb; color: #374151; }
+  .kop-form-panel .field { margin-bottom: 10px; }
+  .kop-form-panel .field label { font-size: 13px; margin-bottom: 4px; }
+  .kop-form-panel input, .kop-form-panel select { padding: 8px; font-size: 13px; }
+  .kop-font-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+  .kop-font-grid .field label { font-size: 12px; }
+  .kop-font-grid input { width: 100%; }
+  .kop-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kop-dim-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kop-preview-panel { display: flex; flex-direction: column; gap: 8px; width: 100%; flex-shrink: 0; }
+  .kop-preview-panel iframe { width: 100%; border: 2px solid #e5e7eb; border-radius: 8px; background: #f3f4f6; display: block; height: auto; }
+  .kop-logo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .kop-logo-preview { width: 36px; height: 36px; border: 1px solid #d1d5db; border-radius: 50%; object-fit: contain; display: none; }
   @media(max-width:600px){
     .q-header{flex-direction:column;}
     .opt-grid, .opt-grid tbody, .opt-grid tr { display: block; width: 100%; }
@@ -179,7 +192,7 @@
 <body>
 <header>
   <h1>📝 Aplikasi Pembuat Soal</h1>
-  <p>Buat soal Pilihan Ganda, Isian, dan Esai dengan gambar • Edit & Hapus kapan saja</p>
+  <p>Buat soal Pilihan Ganda, Isian, dan Esai • Kop soal custom • Cetak langsung</p>
 </header>
 
 <div class="container">
@@ -198,7 +211,10 @@
       <button class="btn btn-gray" onclick="exportData()">💾 Export JSON</button>
       <button class="btn btn-gray" onclick="document.getElementById('importFile').click()">📂 Import JSON</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-gray" onclick="openKopModal()">📋 Kop Soal</button>
       <button class="btn btn-gray" onclick="printQuestions()">🖨️ Cetak / Preview</button>
+      <button class="btn btn-gray" id="btnExportPdf" onclick="exportPdf()">📄 Export PDF</button>
+      <button class="btn btn-gray" id="btnExportWord" onclick="exportWord()">📝 Export Word</button>
       <button class="btn btn-red" onclick="resetApp()">♻️ Reset Aplikasi</button>
     </div>
     <div class="toolbar-row print-settings-row">
@@ -304,6 +320,99 @@
   </div>
 </div>
 
+<!-- MODAL KOP SOAL -->
+<div class="modal-overlay" id="kopModalOverlay">
+  <div class="modal modal-kop">
+    <h2>📋 Pengaturan Kop Soal</h2>
+    <div class="kop-modal-top">
+      <label><input type="checkbox" id="kopEnabled" checked> Tampilkan kop saat cetak</label>
+    </div>
+    <div class="kop-modal-stack">
+      <div class="kop-preview-panel">
+        <strong style="font-size:14px;">Pratinjau</strong>
+        <iframe id="kopPreviewFrame" title="Pratinjau Kop"></iframe>
+      </div>
+      <div class="kop-form-panel" id="kopFormPanel">
+        <div class="field"><label>Judul Atas</label><input type="text" id="kopTopTitle" value="PENILAIAN SUMATIF AKHIR"></div>
+        <div class="field"><label>Nama Sekolah</label><input type="text" id="kopSchoolName" value="SD 067953"></div>
+        <div class="field"><label>Semester</label>
+          <select id="kopSemester"><option value="GANJIL">Ganjil</option><option value="GENAP">Genap</option></select>
+        </div>
+        <div class="field"><label>Tahun Pelajaran</label><input type="text" id="kopSchoolYear" value="2024/2025"></div>
+        <div class="field"><label>Kurikulum</label><input type="text" id="kopCurriculum" value="KURIKULUM MERDEKA"></div>
+        <div class="field"><label>Kota</label><input type="text" id="kopCity" value="KOTA MEDAN"></div>
+        <div class="field"><label>Mata Pelajaran</label><input type="text" id="kopSubject" value="ILMU PENGETAHUAN ALAM DAN SOSIAL (IPAS)"></div>
+        <div class="field"><label>Kelas</label><input type="text" id="kopClassNumber" value="4"></div>
+        <div class="field">
+          <label>Logo Sekolah</label>
+          <div class="kop-logo-row">
+            <button type="button" class="btn btn-gray btn-sm" onclick="document.getElementById('kopLogoFile').click()">🖼️ Pilih Logo</button>
+            <button type="button" class="btn btn-red btn-sm" id="kopLogoRemove" style="display:none;" onclick="removeKopLogo()">Hapus</button>
+            <input type="file" id="kopLogoFile" accept="image/*" style="display:none">
+            <img id="kopLogoPreview" class="kop-logo-preview" alt="">
+          </div>
+          <small style="color:#6b7280;font-size:12px;">Kosongkan jika tidak ingin logo dicetak</small>
+        </div>
+        <div id="kopLogoSettings" class="img-settings" style="display:none;">
+          <label for="kopLogoWidth">Lebar (px):</label>
+          <input type="number" id="kopLogoWidth" value="30" min="10" max="200" step="1">
+          <label for="kopLogoHeight">Tinggi (px):</label>
+          <input type="text" id="kopLogoHeight" value="auto" placeholder="auto" title="Angka (px) atau auto">
+          <label for="kopLogoPosition">Posisi:</label>
+          <select id="kopLogoPosition">
+            <option value="top">Atas teks</option>
+            <option value="left">Kiri teks</option>
+            <option value="right">Kanan teks</option>
+            <option value="bottom">Bawah teks</option>
+          </select>
+          <label for="kopLogoAlign">Rata logo:</label>
+          <select id="kopLogoAlign">
+            <option value="left">Kiri</option>
+            <option value="center">Tengah</option>
+            <option value="right">Kanan</option>
+          </select>
+          <label for="kopLogoOffsetX">Geser ↔ (px):</label>
+          <input type="number" id="kopLogoOffsetX" value="0" min="-150" max="150" step="1" title="Minus = kiri, plus = kanan">
+          <label for="kopLogoOffsetY">Geser ↕ (px):</label>
+          <input type="number" id="kopLogoOffsetY" value="0" min="-40" max="40" step="1" title="Minus = atas, plus = bawah">
+        </div>
+        <h3>Isian Kanan (Nama, Hari, …)</h3>
+        <div class="kop-info-grid">
+          <div class="field"><label>Label 1</label><input type="text" id="kopLabel1" value="Nama"></div>
+          <div class="field"><label>Nilai 1</label><input type="text" id="kopValue1" placeholder="Opsional"></div>
+          <div class="field"><label>Label 2</label><input type="text" id="kopLabel2" value="Hari"></div>
+          <div class="field"><label>Nilai 2</label><input type="text" id="kopValue2" placeholder="Opsional"></div>
+          <div class="field"><label>Label 3</label><input type="text" id="kopLabel3" value="Tanggal"></div>
+          <div class="field"><label>Nilai 3</label><input type="text" id="kopValue3" placeholder="Opsional"></div>
+          <div class="field"><label>Label 4</label><input type="text" id="kopLabel4" value="Waktu"></div>
+          <div class="field"><label>Nilai 4</label><input type="text" id="kopValue4" placeholder="Opsional"></div>
+        </div>
+        <div class="field"><label>Teks Bawah</label><input type="text" id="kopBottomText" value="LEMBAR SOAL"></div>
+        <h3>Dimensi Kop (proporsi pratinjau)</h3>
+        <div class="kop-dim-row">
+          <div class="field"><label>Lebar (px)</label><input type="number" id="kopPageWidth" value="1000" min="200" max="2000" step="10"></div>
+          <div class="field"><label>Tinggi (px)</label><input type="number" id="kopPageHeight" value="150" min="80" max="600" step="10"></div>
+          <div class="field"><label>Border (px)</label><input type="number" id="kopBorderThick" value="2" min="1" max="10" step="0.5"></div>
+        </div>
+        <h3>Ukuran Font Kop (px)</h3>
+        <div class="kop-font-grid">
+          <div class="field"><label>Font Kop</label><input type="number" id="kopFontKop" value="9" min="4" max="40" step="0.5"></div>
+          <div class="field"><label>Font Mapel</label><input type="number" id="kopFontSubject" value="10" min="4" max="40" step="0.5"></div>
+          <div class="field"><label>Label Kelas</label><input type="number" id="kopFontKelasLabel" value="9" min="4" max="40" step="0.5"></div>
+          <div class="field"><label>Angka Kelas</label><input type="number" id="kopFontKelasNumber" value="18" min="6" max="60" step="0.5"></div>
+          <div class="field"><label>Font Info</label><input type="number" id="kopFontInfo" value="9" min="4" max="40" step="0.5"></div>
+          <div class="field"><label>Teks Bawah</label><input type="number" id="kopFontBottom" value="13" min="6" max="40" step="0.5"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px; flex-shrink:0;">
+      <button type="button" class="btn btn-gray" onclick="closeKopModal()">Tutup</button>
+      <button type="button" class="btn btn-primary" onclick="saveKopAndClose()">💾 Simpan Kop</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 let questions = JSON.parse(localStorage.getItem('soal_data') || '[]');
 let currentQImage = null;
@@ -319,6 +428,429 @@ const DEFAULT_PRINT_SETTINGS = {
   questionGap: 1
 };
 let printSettings = { ...DEFAULT_PRINT_SETTINGS };
+
+const DEFAULT_KOP_SETTINGS = {
+  enabled: true,
+  topTitle: 'PENILAIAN SUMATIF AKHIR',
+  schoolName: 'SD 067953',
+  semester: 'GANJIL',
+  schoolYear: '2024/2025',
+  curriculum: 'KURIKULUM MERDEKA',
+  city: 'KOTA MEDAN',
+  subject: 'ILMU PENGETAHUAN ALAM DAN SOSIAL (IPAS)',
+  classNumber: '4',
+  logo: '',
+  logoWidth: 30,
+  logoHeight: 'auto',
+  logoPosition: 'top',
+  logoAlign: 'left',
+  logoOffsetX: 0,
+  logoOffsetY: 0,
+  label1: 'Nama', value1: '',
+  label2: 'Hari', value2: '',
+  label3: 'Tanggal', value3: '',
+  label4: 'Waktu', value4: '',
+  bottomText: 'LEMBAR SOAL',
+  pageWidth: 1000,
+  pageHeight: 150,
+  borderThick: 2,
+  fontKop: 9,
+  fontSubject: 10,
+  fontKelasLabel: 9,
+  fontKelasNumber: 18,
+  fontInfo: 9,
+  fontBottom: 13
+};
+let kopSettings = { ...DEFAULT_KOP_SETTINGS };
+
+function saveKopSettings() {
+  localStorage.setItem('soal_kop_settings', JSON.stringify(kopSettings));
+}
+
+function loadKopSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('soal_kop_settings') || 'null');
+    if (saved && typeof saved === 'object') kopSettings = { ...DEFAULT_KOP_SETTINGS, ...saved };
+  } catch (e) { kopSettings = { ...DEFAULT_KOP_SETTINGS }; }
+}
+
+function getKopLogoFromUI() {
+  if (kopSettings.logo) return kopSettings.logo;
+  const prev = document.getElementById('kopLogoPreview');
+  if (!prev) return '';
+  const src = prev.getAttribute('src') || '';
+  return (src.startsWith('data:') || src.startsWith('blob:')) ? src : '';
+}
+
+function normalizeKopLogoHeight(val) {
+  if (val === null || val === undefined || val === '') return 'auto';
+  return String(val).trim() || 'auto';
+}
+
+function readKopSettingsFromUI() {
+  const v = id => document.getElementById(id)?.value ?? '';
+  const num = (id, def) => {
+    const n = parseFloat(document.getElementById(id)?.value);
+    return Number.isFinite(n) ? n : def;
+  };
+  return {
+    enabled: document.getElementById('kopEnabled')?.checked !== false,
+    topTitle: v('kopTopTitle'),
+    schoolName: v('kopSchoolName'),
+    semester: v('kopSemester') || 'GANJIL',
+    schoolYear: v('kopSchoolYear'),
+    curriculum: v('kopCurriculum'),
+    city: v('kopCity'),
+    subject: v('kopSubject'),
+    classNumber: v('kopClassNumber'),
+    logo: getKopLogoFromUI(),
+    logoWidth: Math.max(10, num('kopLogoWidth', 30)),
+    logoHeight: normalizeKopLogoHeight(document.getElementById('kopLogoHeight')?.value || 'auto'),
+    logoPosition: v('kopLogoPosition') || 'top',
+    logoAlign: v('kopLogoAlign') || 'left',
+    logoOffsetX: num('kopLogoOffsetX', 0),
+    logoOffsetY: num('kopLogoOffsetY', 0),
+    label1: v('kopLabel1'), value1: v('kopValue1'),
+    label2: v('kopLabel2'), value2: v('kopValue2'),
+    label3: v('kopLabel3'), value3: v('kopValue3'),
+    label4: v('kopLabel4'), value4: v('kopValue4'),
+    bottomText: v('kopBottomText'),
+    pageWidth: Math.max(200, num('kopPageWidth', 1000)),
+    pageHeight: Math.max(80, num('kopPageHeight', 150)),
+    borderThick: Math.max(1, num('kopBorderThick', 2)),
+    fontKop: num('kopFontKop', 9),
+    fontSubject: num('kopFontSubject', 10),
+    fontKelasLabel: num('kopFontKelasLabel', 9),
+    fontKelasNumber: num('kopFontKelasNumber', 18),
+    fontInfo: num('kopFontInfo', 9),
+    fontBottom: num('kopFontBottom', 13)
+  };
+}
+
+function applyKopSettingsToUI() {
+  const k = kopSettings;
+  document.getElementById('kopEnabled').checked = k.enabled !== false;
+  document.getElementById('kopTopTitle').value = k.topTitle;
+  document.getElementById('kopSchoolName').value = k.schoolName;
+  document.getElementById('kopSemester').value = k.semester || 'GANJIL';
+  document.getElementById('kopSchoolYear').value = k.schoolYear;
+  document.getElementById('kopCurriculum').value = k.curriculum;
+  document.getElementById('kopCity').value = k.city;
+  document.getElementById('kopSubject').value = k.subject;
+  document.getElementById('kopClassNumber').value = k.classNumber;
+  document.getElementById('kopLabel1').value = k.label1;
+  document.getElementById('kopValue1').value = k.value1;
+  document.getElementById('kopLabel2').value = k.label2;
+  document.getElementById('kopValue2').value = k.value2;
+  document.getElementById('kopLabel3').value = k.label3;
+  document.getElementById('kopValue3').value = k.value3;
+  document.getElementById('kopLabel4').value = k.label4;
+  document.getElementById('kopValue4').value = k.value4;
+  document.getElementById('kopBottomText').value = k.bottomText;
+  document.getElementById('kopPageWidth').value = k.pageWidth;
+  document.getElementById('kopPageHeight').value = k.pageHeight;
+  document.getElementById('kopBorderThick').value = k.borderThick;
+  document.getElementById('kopFontKop').value = k.fontKop;
+  document.getElementById('kopFontSubject').value = k.fontSubject;
+  document.getElementById('kopFontKelasLabel').value = k.fontKelasLabel;
+  document.getElementById('kopFontKelasNumber').value = k.fontKelasNumber;
+  document.getElementById('kopFontInfo').value = k.fontInfo;
+  document.getElementById('kopFontBottom').value = k.fontBottom;
+  document.getElementById('kopLogoWidth').value = k.logoWidth ?? 30;
+  document.getElementById('kopLogoHeight').value = k.logoHeight ?? 'auto';
+  document.getElementById('kopLogoPosition').value = k.logoPosition || 'top';
+  document.getElementById('kopLogoAlign').value = k.logoAlign || 'left';
+  document.getElementById('kopLogoOffsetX').value = k.logoOffsetX ?? 0;
+  document.getElementById('kopLogoOffsetY').value = k.logoOffsetY ?? 0;
+  const prev = document.getElementById('kopLogoPreview');
+  const rm = document.getElementById('kopLogoRemove');
+  if (k.logo) {
+    prev.src = k.logo;
+    prev.style.display = 'inline-block';
+    if (rm) rm.style.display = 'inline-flex';
+  } else {
+    prev.removeAttribute('src');
+    prev.style.display = 'none';
+    if (rm) rm.style.display = 'none';
+  }
+  toggleKopLogoSettings();
+}
+
+function toggleKopLogoSettings() {
+  const el = document.getElementById('kopLogoSettings');
+  if (!el) return;
+  el.style.display = getKopLogoFromUI() ? 'flex' : 'none';
+}
+
+function getKopSettings() {
+  return { ...kopSettings };
+}
+
+function generateKopInfoRow(label, value) {
+  const l = escapeHtml(label);
+  const val = (value || '').trim();
+  const valCell = val ? escapeHtml(val) : '';
+  return `<tr><td class="kop-info-lbl">${l}</td><td class="kop-info-sep">:</td><td class="kop-info-val">${valCell}</td></tr>`;
+}
+
+function getKopLogoImgStyle(k) {
+  const w = Math.max(10, parseFloat(k.logoWidth) || 30);
+  const hRaw = normalizeKopLogoHeight(k.logoHeight);
+  const base = 'max-width:100%;object-fit:contain;display:block;margin:0;';
+  if (hRaw === 'auto') return `width:${w}px;height:auto;${base}`;
+  const h = Math.max(10, parseFloat(hRaw) || w);
+  return `width:${w}px;height:${h}px;${base}`;
+}
+
+function renderKopLogoHtml(k, forPreview) {
+  if (!k.logo) return '';
+  const style = getKopLogoImgStyle(k);
+  if (forPreview) {
+    return `<img class="kop-logo-img" style="${style}" alt="" data-kop-logo="1">`;
+  }
+  return `<img src="${k.logo}" class="kop-logo-img" style="${style}" alt="">`;
+}
+
+function renderKopLogoBlock(k, forPreview) {
+  const logo = renderKopLogoHtml(k, forPreview);
+  if (!logo) return '';
+  return `<div class="kop-logo-wrap" style="${getKopLogoWrapStyle(k)}">${logo}</div>`;
+}
+
+function renderKopTitleHtml(k) {
+  const topTitle = escapeHtml((k.topTitle || '').trim() || 'PENILAIAN SUMATIF AKHIR');
+  const school = escapeHtml((k.schoolName || '').trim() || 'SD 067953');
+  const semester = escapeHtml(k.semester || 'GANJIL');
+  const year = escapeHtml((k.schoolYear || '').trim() || '2024/2025');
+  const curriculum = escapeHtml((k.curriculum || '').trim() || 'KURIKULUM MERDEKA');
+  const city = escapeHtml((k.city || '').trim() || 'KOTA MEDAN');
+  const subject = escapeHtml((k.subject || '').trim() || 'MATA PELAJARAN');
+  return `<div class="kop-text">${topTitle}<br>
+      SEMESTER ${semester} ${school}<br>
+      TAHUN PELAJARAN : ${year}<br>
+      ${curriculum}<br>
+      ${city}
+    </div>
+    <div class="kop-subject">${subject}</div>`;
+}
+
+function getKopLogoWrapStyle(k) {
+  const align = k.logoAlign || 'left';
+  const ox = Number(k.logoOffsetX) || 0;
+  const oy = Number(k.logoOffsetY) || 0;
+  const justify = align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start';
+  return `display:flex;justify-content:${justify};align-items:center;width:100%;`
+    + `padding:0;box-sizing:border-box;transform:translate(${ox}px,${oy}px);`;
+}
+
+function renderKopLeftInner(k, forPreview) {
+  const logoBlock = renderKopLogoBlock(k, forPreview);
+  const title = renderKopTitleHtml(k);
+  const pos = k.logoPosition || 'top';
+  const logoW = Math.max(10, parseFloat(k.logoWidth) || 30);
+
+  if (!logoBlock) {
+    return `<div class="kop-left-stack"><div class="kop-title-cell kop-no-logo">${title}</div></div>`;
+  }
+  if (pos === 'top') {
+    return `<div class="kop-left-stack">
+      ${logoBlock}
+      <div class="kop-title-cell">${title}</div>
+    </div>`;
+  }
+  if (pos === 'bottom') {
+    return `<div class="kop-left-stack">
+      <div class="kop-title-cell">${title}</div>
+      ${logoBlock}
+    </div>`;
+  }
+  if (pos === 'right') {
+    return `<table class="kop-inner-left">
+      <tr><td class="kop-title-cell">${title}</td><td class="kop-logo-cell kop-logo-pos-right" style="width:${logoW + 16}px;">${logoBlock}</td></tr>
+    </table>`;
+  }
+  if (pos === 'left') {
+    return `<table class="kop-inner-left">
+      <tr><td class="kop-logo-cell kop-logo-pos-left" style="width:${logoW + 16}px;">${logoBlock}</td><td class="kop-title-cell">${title}</td></tr>
+    </table>`;
+  }
+  return `<div class="kop-left-stack">${logoBlock}<div class="kop-title-cell">${title}</div></div>`;
+}
+
+function generateKopCss(k, forPrint) {
+  const pageW = k.pageWidth || 1000;
+  const pageH = k.pageHeight || 150;
+  const bt = k.borderThick || 2;
+  const sizeRule = forPrint
+    ? `width:100%;aspect-ratio:${pageW}/${pageH};height:auto;overflow:hidden;`
+    : `width:100%;height:100%;overflow:hidden;`;
+  const previewShell = forPrint ? '' : `
+html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;box-sizing:border-box;}
+body{background:#e8e8e8;padding:6px;}
+.kop-preview-shell{width:100%;height:100%;box-sizing:border-box;overflow:hidden;display:flex;align-items:stretch;}
+`;
+  return `${previewShell}
+.print-kop-wrap{column-span:all;-webkit-column-span:all;width:100%;margin:0 0 0.6em 0;break-after:avoid;page-break-after:avoid;page-break-inside:avoid;}
+.kop-page{${sizeRule}background:#fff;border:${bt}px solid #000;padding:4px 8px;box-sizing:border-box;display:flex;flex-direction:column;font-family:"Times New Roman",Times,serif;}
+.kop-main-table{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:none;flex:1;min-height:0;}
+.kop-main-table td{vertical-align:top;padding:0;}
+.kop-left-col{width:60%;border-right:1px solid #000;padding:2px 6px;vertical-align:top;overflow:hidden;}
+.kop-left-stack{display:flex;flex-direction:column;width:100%;gap:2px;align-items:stretch;min-width:0;}
+.kop-logo-wrap{flex-shrink:0;overflow:visible;}
+.kop-center-col{width:12%;border-right:1px solid #000;text-align:center;padding:2px 4px;}
+.kop-right-col{width:28%;padding:2px 6px;overflow:hidden;}
+.kop-main-row{border-bottom:1px solid #000;height:calc(100% - 1.6em);}
+.kop-inner-left{width:100%;border-collapse:collapse;border:none;table-layout:fixed;}
+.kop-inner-left td{border:none;vertical-align:middle;overflow:hidden;}
+.kop-logo-cell{text-align:center;padding:2px 4px;vertical-align:middle;}
+.kop-logo-pos-left{padding-right:4px;}
+.kop-logo-pos-right{padding-left:4px;}
+.kop-logo-img{display:block;max-width:100%;}
+.kop-title-cell{text-align:center;width:100%;min-width:0;overflow:hidden;}
+.kop-no-logo{width:100%;}
+.kop-text{font-size:${k.fontKop}px;line-height:1.25;margin-bottom:1px;word-wrap:break-word;}
+.kop-subject{font-size:${k.fontSubject}px;font-weight:bold;line-height:1.15;margin-top:1px;word-wrap:break-word;}
+.kop-kelas-table{width:100%;height:100%;border-collapse:collapse;border:none;}
+.kop-kelas-table td{border:none;border-bottom:1px solid #000;padding:2px 1px;font-size:${k.fontKelasLabel}px;vertical-align:middle;}
+.kop-kelas-table tr:last-child td{border-bottom:none;}
+.kop-kelas-number{font-size:${k.fontKelasNumber}px;font-weight:bold;}
+.kop-info-table{width:100%;height:100%;border-collapse:collapse;border:none;font-size:${k.fontInfo}px;table-layout:auto;}
+.kop-info-table tr{height:25%;}
+.kop-info-table td{border:none;border-bottom:1px solid #000;padding:2px 0;vertical-align:middle;}
+.kop-info-table tr:last-child td{border-bottom:none;}
+.kop-info-lbl{white-space:nowrap;width:1%;text-align:left;padding-right:0;padding-left:0;}
+.kop-info-sep{white-space:nowrap;width:1%;padding:2px 2px 2px 1px;}
+.kop-info-val{text-align:left;padding-left:2px;word-wrap:break-word;}
+.kop-bottom-row{text-align:center;vertical-align:middle;height:1.6em;border-top:1px solid #000;border-bottom:none;}
+.kop-bottom-row p{margin:0;font-size:${k.fontBottom}px;font-weight:bold;letter-spacing:1px;line-height:1.6em;}`;
+}
+
+function generateKopHtmlBody(k, forPreview) {
+  const kelas = escapeHtml((k.classNumber || '').trim() || '4');
+  const bottomText = escapeHtml((k.bottomText || '').trim() || 'LEMBAR SOAL');
+  const shellOpen = forPreview ? '<div class="kop-preview-shell">' : '';
+  const shellClose = forPreview ? '</div>' : '';
+
+  return `${shellOpen}<div class="kop-page">
+    <table class="kop-main-table">
+      <tr class="kop-main-row">
+        <td class="kop-left-col">${renderKopLeftInner(k, forPreview)}</td>
+        <td class="kop-center-col">
+          <table class="kop-kelas-table">
+            <tr><td>KELAS</td></tr>
+            <tr><td class="kop-kelas-number">${kelas}</td></tr>
+          </table>
+        </td>
+        <td class="kop-right-col">
+          <table class="kop-info-table">
+            ${generateKopInfoRow(k.label1 || 'Nama', k.value1)}
+            ${generateKopInfoRow(k.label2 || 'Hari', k.value2)}
+            ${generateKopInfoRow(k.label3 || 'Tanggal', k.value3)}
+            ${generateKopInfoRow(k.label4 || 'Waktu', k.value4)}
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" class="kop-bottom-row"><p>${bottomText}</p></td>
+      </tr>
+    </table>
+  </div>${shellClose}`;
+}
+
+function applyKopPreviewLogo(doc, logoData) {
+  if (!doc || !logoData) return;
+  doc.querySelectorAll('img[data-kop-logo]').forEach(img => { img.src = logoData; });
+}
+
+function syncKopPreviewFrameSize(frame, pageW, pageH) {
+  const w = Math.max(200, pageW || 1000);
+  const h = Math.max(80, pageH || 150);
+  frame.style.width = '100%';
+  frame.style.aspectRatio = `${w} / ${h}`;
+  frame.style.height = 'auto';
+  frame.style.maxHeight = '280px';
+  frame.style.minHeight = '90px';
+  frame.style.border = '0';
+}
+
+function updateKopPreview() {
+  const frame = document.getElementById('kopPreviewFrame');
+  if (!frame) return;
+  const k = readKopSettingsFromUI();
+  if (k.logo) kopSettings.logo = k.logo;
+  const pageW = k.pageWidth || 1000;
+  const pageH = k.pageHeight || 150;
+  syncKopPreviewFrameSize(frame, pageW, pageH);
+  const doc = frame.contentDocument || frame.contentWindow?.document;
+  if (!doc) return;
+  const logoData = k.logo || getKopLogoFromUI();
+  if (logoData) k.logo = logoData;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    ${generateKopCss(k, false)}
+  </style></head><body>${generateKopHtmlBody(k, true)}</body></html>`;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  const injectLogo = () => applyKopPreviewLogo(doc, logoData);
+  injectLogo();
+  if (logoData) requestAnimationFrame(injectLogo);
+}
+
+function openKopModal() {
+  applyKopSettingsToUI();
+  document.getElementById('kopModalOverlay').classList.add('active');
+  requestAnimationFrame(() => updateKopPreview());
+}
+
+function closeKopModal() {
+  document.getElementById('kopModalOverlay').classList.remove('active');
+}
+
+function saveKopAndClose() {
+  kopSettings = readKopSettingsFromUI();
+  saveKopSettings();
+  closeKopModal();
+}
+
+function removeKopLogo() {
+  kopSettings.logo = '';
+  const prev = document.getElementById('kopLogoPreview');
+  prev.removeAttribute('src');
+  prev.style.display = 'none';
+  document.getElementById('kopLogoRemove').style.display = 'none';
+  document.getElementById('kopLogoFile').value = '';
+  toggleKopLogoSettings();
+  updateKopPreview();
+}
+
+function bindKopModalInputs() {
+  const panel = document.getElementById('kopFormPanel');
+  if (!panel || panel.dataset.bound) return;
+  panel.dataset.bound = '1';
+  panel.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', updateKopPreview);
+    el.addEventListener('change', updateKopPreview);
+  });
+  document.getElementById('kopEnabled')?.addEventListener('change', updateKopPreview);
+  document.getElementById('kopLogoFile')?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      kopSettings.logo = ev.target.result;
+      const prev = document.getElementById('kopLogoPreview');
+      prev.src = kopSettings.logo;
+      prev.style.display = 'inline-block';
+      document.getElementById('kopLogoRemove').style.display = 'inline-flex';
+      toggleKopLogoSettings();
+      updateKopPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('kopModalOverlay')?.addEventListener('click', e => {
+    if (e.target.id === 'kopModalOverlay') closeKopModal();
+  });
+}
 
 function save() {
   localStorage.setItem('soal_data', JSON.stringify(questions));
@@ -378,25 +910,36 @@ function getPrintSettings() {
   return { ...printSettings };
 }
 
-const PAPER_SIZES = { A4: 'A4', A5: 'A5', Letter: 'letter', Legal: 'legal', F4: '216mm 330mm' };
+const PAPER_PRESETS = {
+  A4:     { pageSize: '210mm 297mm',  w: 210, h: 297, dialog: 'A4' },
+  A5:     { pageSize: '148mm 210mm',  w: 148, h: 210, dialog: 'A5' },
+  Letter: { pageSize: '215.9mm 279.4mm', w: 216, h: 279, dialog: 'Letter / US Letter' },
+  Legal:  { pageSize: '215.9mm 355.6mm', w: 216, h: 356, dialog: 'Legal' },
+  F4:     { pageSize: '210mm 330mm',  w: 210, h: 330, dialog: 'F4 / Folio (210×330 mm)' }
+};
+
+function getPaperPreset(key) {
+  return PAPER_PRESETS[key] || PAPER_PRESETS.A4;
+}
 
 function resetApp() {
   const ok = confirm(
-    'Reset aplikasi akan menghapus semua data yang tersimpan (bank soal + pengaturan cetak) di browser ini.\n\nLanjutkan?'
+    'Reset aplikasi akan menghapus semua data yang tersimpan (bank soal + pengaturan cetak + kop soal) di browser ini.\n\nLanjutkan?'
   );
   if (!ok) return;
   try {
     localStorage.removeItem('soal_data');
     localStorage.removeItem('soal_print_settings');
+    localStorage.removeItem('soal_kop_settings');
   } catch (e) {
     // ignore
   }
   questions = [];
   printSettings = { ...DEFAULT_PRINT_SETTINGS };
+  kopSettings = { ...DEFAULT_KOP_SETTINGS };
   applyPrintSettingsToUI();
   save();
   render();
-  // Reload untuk memastikan state benar-benar bersih
   location.reload();
 }
 
@@ -624,7 +1167,7 @@ function renderPGOptionLine(o, oi, opts) {
   content += img;
   content += tag;
   if (!content) content = '—';
-  return `<div class="opt-pg-hang"><b>${letter}.</b> ${content}</div>`;
+  return `<div class="opt-row"><span class="opt-lbl">${letter}.</span><span class="opt-body">${content}</span></div>`;
 }
 
 function renderQuestionHeaderForCard(q) {
@@ -837,13 +1380,14 @@ const PG_LONG_CHARS = 20;
 const PG_LINE_COL = 26;
 const PG_LINE_STACK = 32;
 const PG_INDENT = '1.35em';
+const PG_OPT_MARGIN_LEFT = '1.15em';
 
 function pgOptionStylesScreen() {
   return `.opt-grid{width:100%;max-width:100%;margin-top:6px;border-collapse:collapse;table-layout:fixed;}
 .opt-grid td{width:50%;vertical-align:top;padding:0 1em 0 0;overflow:hidden;word-wrap:break-word;}
 .opt-grid td+td{padding:0 0 0 1em;}
 .opt-entry{margin:0.15em 0;max-width:100%;overflow:hidden;}
-.opt-row{display:grid;grid-template-columns:1.65em minmax(0,1fr);column-gap:0.3em;line-height:1.45;max-width:100%;}
+.opt-row{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:0.25em;line-height:1.45;max-width:100%;}
 .opt-lbl{font-weight:700;}
 .opt-body{min-width:0;overflow-wrap:anywhere;word-wrap:break-word;word-break:break-all;}
 .opt-img{max-width:100%;height:auto;margin-top:4px;display:block;}`;
@@ -851,18 +1395,26 @@ function pgOptionStylesScreen() {
 
 function printDocumentStyles() {
   const s = getPrintSettings();
-  const paper = PAPER_SIZES[s.paper] || 'A4';
-  const titleSize = Math.round(s.fontSize * 1.05);
+  const k = getKopSettings();
+  const p = getPaperPreset(s.paper);
   const sectionSize = s.fontSize + 2;
-  return `@page{size:${paper};margin:${s.marginTop}mm ${s.marginRight}mm ${s.marginBottom}mm ${s.marginLeft}mm;}
+  const kopCss = k.enabled ? generateKopCss(k, true) : '';
+  const pageRule = `size:${p.pageSize};margin:${s.marginTop}mm ${s.marginRight}mm ${s.marginBottom}mm ${s.marginLeft}mm;`;
+  return `@page{${pageRule}}
 @media print{
+  @page{${pageRule}}
+  html,body{width:auto!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .print-sheet{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;}
   .print-flow{column-fill:auto;-webkit-column-fill:auto;}
+  .print-kop-wrap{break-after:avoid;page-break-after:avoid;}
   .opt-grid-print,table{page-break-inside:auto;}
   .q{page-break-inside:avoid;break-inside:avoid;}
 }
+html,body{margin:0;padding:0;}
 body{font-family:"Times New Roman",Times,serif;font-size:${s.fontSize}px;line-height:1.4;color:#000;margin:0;padding:0;}
-.print-title{text-align:center;font-size:${titleSize}px;font-weight:700;margin:0 0 0.8em 0;column-span:all;}
+.print-sheet{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;}
+${kopCss}
 .print-flow{
   column-count:2;column-gap:2.2em;column-rule:1.5px solid #000;
   column-fill:auto;-webkit-column-fill:auto;
@@ -878,19 +1430,24 @@ body{font-family:"Times New Roman",Times,serif;font-size:${s.fontSize}px;line-he
 .q-inline-run img,.q-inline-run .q-img{display:inline-block!important;vertical-align:middle;}
 .q-img-wrap{display:block;margin:0.2em 0;}
 .q-img{height:auto;}
-.opt-pg-hang{padding-left:1.65em;text-indent:-1.65em;line-height:1.35;margin:0.1em 0;word-break:normal;overflow-wrap:break-word;}
-.opt-pg-hang img,.opt-pg-hang .opt-img{display:inline-block!important;vertical-align:middle;margin:0;}
-.opt-grid-print{width:100%;margin:0.15em 0 0 0.35em;border-collapse:collapse;table-layout:fixed;}
-.opt-grid-print td{width:50%;vertical-align:top;padding:0.1em 0.5em 0.15em 0;overflow:hidden;
+.opt-row{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:0.25em;align-items:start;line-height:1.35;margin:0.1em 0;max-width:100%;}
+.opt-lbl{font-weight:700;}
+.opt-body{min-width:0;overflow-wrap:break-word;word-wrap:break-word;word-break:normal;text-align:left;}
+.opt-row img,.opt-row .opt-img{display:inline-block!important;vertical-align:middle;margin:0;}
+.opt-grid-print{width:100%;margin:0.15em 0 0 ${PG_OPT_MARGIN_LEFT};border-collapse:collapse;table-layout:fixed;}
+.opt-grid-print td{width:50%;vertical-align:top;padding:0.1em 0.5em 0.15em 0.25em;overflow:hidden;
   word-wrap:break-word;word-break:break-all;overflow-wrap:anywhere;line-height:1.35;}
-.opt-grid-print td.og-cell-r{padding-left:0.65em;}
+.opt-grid-print td.og-cell-r{padding-left:0.85em;}
 .opt-l{margin:0 0 0.05em 0;}
 .opt-t{margin:0 0 0.1em 0;text-align:justify;}
 .opt-answer{margin:0.15em 0 0 ${PG_INDENT};display:flex;align-items:flex-end;gap:1ch;}
 .opt-dots{flex:1;min-width:0;border-bottom:1px dotted #000;height:1em;}
 .opt-esai-box{margin:0.15em 0 0 ${PG_INDENT};border-bottom:1px solid #000;min-height:0;height:1em;}
-.opt-list-vertical{margin:0.15em 0 0 0.35em;}
-.opt-vertical-item{margin:0.12em 0;overflow:hidden;word-break:break-all;}`;
+.opt-list-vertical{margin:0.15em 0 0 ${PG_OPT_MARGIN_LEFT};}
+.opt-vertical-item{margin:0.12em 0;overflow:hidden;word-break:break-all;}
+.export-cols{width:100%;border-collapse:collapse;table-layout:fixed;}
+.export-col-l{width:50%;vertical-align:top;padding:0 1.1em 0 0;border-right:1.5px solid #000;}
+.export-col-r{width:50%;vertical-align:top;padding:0 0 0 1.1em;}`;
 }
 
 function isLongOptionText(text) {
@@ -935,34 +1492,46 @@ function renderPrintQuestion(q, num) {
   return `<div class="q">${renderQuestionHeaderHtml(q, num, 'q-img')}${extra}</div>`;
 }
 
-function collectPrintBlocks() {
-  const blocks = [];
+function collectPrintBlockItems() {
+  const items = [];
   const pg = questions.filter(q => q.type === 'pg');
   const isian = questions.filter(q => q.type === 'isian');
   const esai = questions.filter(q => q.type === 'esai');
 
   if (pg.length) {
-    blocks.push('<div class="section-title"><b>A. Pilihan Ganda</b></div>');
-    pg.forEach(q => blocks.push(renderPrintQuestion(q, questions.indexOf(q) + 1)));
+    items.push('<div class="section-title"><b>A. Pilihan Ganda</b></div>');
+    pg.forEach(q => items.push(renderPrintQuestion(q, questions.indexOf(q) + 1)));
   }
   if (isian.length) {
-    blocks.push('<div class="section-title"><b>B. Isian</b></div>');
-    isian.forEach((q, i) => blocks.push(renderPrintQuestion(q, i + 1)));
+    items.push('<div class="section-title"><b>B. Isian</b></div>');
+    isian.forEach((q, i) => items.push(renderPrintQuestion(q, i + 1)));
   }
   if (esai.length) {
-    blocks.push('<div class="section-title"><b>C. Esai</b></div>');
-    esai.forEach((q, i) => blocks.push(renderPrintQuestion(q, i + 1)));
+    items.push('<div class="section-title"><b>C. Esai</b></div>');
+    esai.forEach((q, i) => items.push(renderPrintQuestion(q, i + 1)));
   }
-  return blocks;
+  return items;
 }
 
-function buildPrintHtml() {
-  const blocks = collectPrintBlocks();
-  const body = `
-    <h1 class="print-title">Bank Soal</h1>
-    <div class="print-flow">${blocks.join('')}</div>`;
-  return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Bank Soal</title>
-<style>${printDocumentStyles()}</style></head><body>${body}</body></html>`;
+function collectPrintBlocks() {
+  return collectPrintBlockItems();
+}
+
+function buildPrintHtml(autoPrint) {
+  const blocks = collectPrintBlockItems();
+  const k = getKopSettings();
+  const p = getPaperPreset(getPrintSettings().paper);
+  const kopHeader = k.enabled
+    ? `<div class="print-kop-wrap">${generateKopHtmlBody(k)}</div>`
+    : '';
+  const body = `<div class="print-sheet">${kopHeader}<div class="print-flow">${blocks.join('')}</div></div>`;
+  const printScript = autoPrint
+    ? '<script>window.addEventListener("load",function(){setTimeout(function(){window.focus();window.print();},700);});<\/script>'
+    : '';
+  return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
+<meta name="paper-size" content="${p.pageSize}">
+<title>Cetak Soal — ${escapeHtml(p.dialog)}</title>
+<style>${printDocumentStyles()}</style></head><body>${body}${printScript}</body></html>`;
 }
 
 function renderPGOptionsVertical(q, highlight) {
@@ -1010,6 +1579,138 @@ function exportData(){
   a.download = 'bank-soal.json';
   a.click();
 }
+
+function getExportBaseName() {
+  const k = getKopSettings();
+  const raw = (k.subject || k.schoolName || 'bank-soal').trim();
+  const safe = raw.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '-').slice(0, 48);
+  return safe || 'bank-soal';
+}
+
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+function ensureExportReady() {
+  if (!questions.length) {
+    alert('Belum ada soal untuk diekspor!');
+    return false;
+  }
+  printSettings = readPrintSettingsFromUI();
+  savePrintSettings();
+  return true;
+}
+
+function measurePrintItemHeights(items) {
+  const s = getPrintSettings();
+  const p = getPaperPreset(s.paper);
+  const sheetPx = Math.round((p.w - s.marginLeft - s.marginRight) * 96 / 25.4);
+  const colPx = Math.max(200, Math.floor((sheetPx - 28) / 2));
+
+  const host = document.createElement('div');
+  host.style.cssText = `position:fixed;left:-20000px;top:0;width:${colPx}px;visibility:hidden;
+    font-family:"Times New Roman",Times,serif;font-size:${s.fontSize}px;line-height:1.4;color:#000;`;
+  const st = document.createElement('style');
+  st.textContent = printDocumentStyles();
+  host.appendChild(st);
+  const meas = document.createElement('div');
+  host.appendChild(meas);
+  document.body.appendChild(host);
+
+  const heights = items.map(html => {
+    meas.innerHTML = html;
+    return meas.scrollHeight;
+  });
+  document.body.removeChild(host);
+  return heights;
+}
+
+/** Simulasi column-fill:auto — kolom kiri diisi dulu hingga ~setengah tinggi total */
+function splitPrintItemsColumnFill(items) {
+  if (!items.length) return { left: [], right: [] };
+  const heights = measurePrintItemHeights(items);
+  const total = heights.reduce((a, b) => a + b, 0);
+  const target = total / 2;
+  const left = [];
+  const right = [];
+  let sum = 0;
+  for (let i = 0; i < items.length; i++) {
+    if (right.length === 0 && (sum + heights[i] <= target || left.length === 0)) {
+      left.push(items[i]);
+      sum += heights[i];
+    } else {
+      right.push(items[i]);
+    }
+  }
+  return { left, right };
+}
+
+function buildWordExportHtml(leftItems, rightItems) {
+  const k = getKopSettings();
+  const kopHeader = k.enabled
+    ? `<div class="print-kop-wrap">${generateKopHtmlBody(k)}</div>`
+    : '';
+  const flow = `<table class="export-cols" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td class="export-col-l" width="50%" valign="top">${leftItems.join('')}</td>
+    <td class="export-col-r" width="50%" valign="top">${rightItems.join('')}</td>
+  </tr></table>`;
+  return `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:w="urn:schemas-microsoft-com:office:word"
+  xmlns="http://www.w3.org/TR/REC-html40" lang="id">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(k.schoolName || 'Bank Soal')}</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>${printDocumentStyles()}</style>
+</head>
+<body><div class="print-sheet">${kopHeader}${flow}</div></body>
+</html>`;
+}
+
+function setExportButtonBusy(btn, busy, idleText) {
+  if (!btn) return;
+  btn.disabled = busy;
+  btn.textContent = busy ? '⏳ Memproses…' : idleText;
+}
+
+function exportPdf() {
+  if (!ensureExportReady()) return;
+  const html = buildPrintHtml(true);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (!win) {
+    URL.revokeObjectURL(url);
+    alert('Izinkan pop-up browser untuk export PDF.\nAlternatif: gunakan tombol Cetak / Preview.');
+    return;
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+}
+
+function exportWord() {
+  if (!ensureExportReady()) return;
+  const btn = document.getElementById('btnExportWord');
+  setExportButtonBusy(btn, true);
+  try {
+    const items = collectPrintBlockItems();
+    const { left, right } = splitPrintItemsColumnFill(items);
+    const html = buildWordExportHtml(left, right);
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+    downloadBlob(blob, `${getExportBaseName()}.doc`);
+  } catch (err) {
+    alert('Gagal export Word.\n' + (err.message || err));
+  } finally {
+    setExportButtonBusy(btn, false, '📝 Export Word');
+  }
+}
+
 function importData(e){
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
@@ -1029,30 +1730,32 @@ function importData(e){
 }
 
 function printQuestions(){
-  if (!questions.length) { alert('Belum ada soal untuk dicetak!'); return; }
-  printSettings = readPrintSettingsFromUI();
-  savePrintSettings();
-  const html = buildPrintHtml();
-  const frame = document.createElement('iframe');
-  frame.setAttribute('style', 'position:fixed;left:-9999px;top:0;width:0;height:0;border:0;');
-  document.body.appendChild(frame);
-  const win = frame.contentWindow;
-  const doc = win.document;
-  doc.open();
-  doc.write(html);
-  doc.close();
-  const doPrint = () => {
-    win.focus();
-    win.print();
-    setTimeout(() => frame.remove(), 1500);
-  };
-  if (doc.readyState === 'complete') setTimeout(doPrint, 300);
-  else frame.onload = () => setTimeout(doPrint, 300);
+  if (!ensureExportReady()) return;
+  const p = getPaperPreset(printSettings.paper);
+  if (printSettings.paper !== 'A4') {
+    const ok = confirm(
+      'Ukuran kertas aplikasi: ' + p.dialog + '.\n\n' +
+      'Di dialog cetak browser, pilih ukuran kertas yang SAMA (mis. F4/Folio).\n\nLanjutkan cetak?'
+    );
+    if (!ok) return;
+  }
+  const html = buildPrintHtml(true);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (!win) {
+    URL.revokeObjectURL(url);
+    alert('Izinkan pop-up browser untuk cetak.');
+    return;
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
 }
 
 loadPrintSettings();
+loadKopSettings();
 applyPrintSettingsToUI();
 bindPrintSettingsInputs();
+bindKopModalInputs();
 render();
 </script>
 </body>
