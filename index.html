@@ -152,13 +152,12 @@
   .q-options-wrap { max-width: 100%; overflow: hidden; padding-left: 1.15em; box-sizing: border-box; }
   .q-head-block { margin: 0 0 0.35em 0; max-width: 100%; }
   .q-head-row { margin: 0.1em 0; }
-  .q-line-table { width: 100%; max-width: 100%; border-collapse: collapse; border: none; table-layout: fixed; margin: 0.1em 0; }
-  .q-line-table td { border: none; padding: 0; vertical-align: top; }
-  .q-num-cell { width: 1%; white-space: nowrap; font-weight: 700; padding-right: 0.35em; vertical-align: top; }
-  .q-num-cell.q-num-spacer { visibility: hidden; pointer-events: none; user-select: none; }
-  .q-text-cell { text-align: justify; line-height: 1.45; word-wrap: break-word; overflow-wrap: break-word; word-break: normal; }
+  .q-hang-line {
+    margin: 0.1em 0; max-width: 100%; box-sizing: border-box;
+    text-align: justify; line-height: 1.45;
+    word-wrap: break-word; overflow-wrap: break-word; word-break: normal;
+  }
   .q-text-row { margin: 0 0 0.2em 0; }
-  .q-num-spacer { visibility: hidden; pointer-events: none; user-select: none; }
   .q-head-img-wrap img { display: block !important; margin: 0; height: auto; }
   .question-item { overflow: hidden; max-width: 100%; }
   .pg-format-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -1087,8 +1086,10 @@ function updateQImagePreviewLayout(imgSrc) {
   const src = imgSrc || document.getElementById('qImagePreview')?.src || '';
   const imgHtml = `<img id="qImagePreview" class="img-preview q-inline-img q-head-img" alt="" src="${src}" style="${getQImageWidthStyle()}display:inline-block;vertical-align:middle;">`;
   const previewText = escapeHtml(sample);
-  const textRow = buildQuestionLineTable(1, `<span id="qImagePreviewText" class="q-preview-txt">${previewText}</span>`, 'q-head-row', false);
-  const imgRow = buildQuestionLineTable(1, `<span class="q-head-img-wrap">${imgHtml}</span>`, 'q-head-row', true);
+  const hang1 = getQuestionHangStyle(1, false);
+  const hangSpacer = getQuestionHangStyle(1, true);
+  const textRow = `<div class="q-hang-line q-head-row" style="${hang1}"><b>1.</b> <span id="qImagePreviewText" class="q-preview-txt">${previewText}</span></div>`;
+  const imgRow = `<div class="q-hang-line q-head-row" style="${hangSpacer}"><span class="q-head-img-wrap">${imgHtml}</span></div>`;
 
   if (pos === 'left') {
     const previewNumLbl = '<span class="opt-lbl q-num-lbl"><b>1.</b></span>';
@@ -1170,19 +1171,25 @@ function renderQuestionImageTag(q, imgClass, asBlock) {
   return `<img src="${q.image}" class="${cls} q-inline-img q-head-img" style="${getQuestionImageStyle(q)}${disp}" alt="">`;
 }
 
-function buildQuestionLineTable(num, bodyHtml, extraClass = '', spacer = false) {
-  const numCell = `<td class="q-num-cell${spacer ? ' q-num-spacer' : ''}"><b>${num}.</b></td>`;
-  const cls = extraClass ? ` q-line-table ${extraClass}` : ' q-line-table';
-  return `<table class="${cls.trim()}" role="presentation"><tr>${numCell}<td class="q-text-cell">${bodyHtml}</td></tr></table>`;
+function getQuestionNumIndentCh(num) {
+  return String(num).length + 1;
+}
+
+function getQuestionHangStyle(num, spacerOnly = false) {
+  const ch = getQuestionNumIndentCh(num);
+  return spacerOnly ? `padding-left:${ch}ch;` : `padding-left:${ch}ch;text-indent:-${ch}ch;`;
 }
 
 function buildQuestionTextRow(num, text) {
   const t = (text || '').trim();
-  return buildQuestionLineTable(num, t ? escapeHtml(t) : '', 'q-text-row', false);
+  const style = getQuestionHangStyle(num, false);
+  const inner = t ? `<b>${num}.</b> ${escapeHtml(t)}` : `<b>${num}.</b>`;
+  return `<div class="q-hang-line q-text-row" style="${style}">${inner}</div>`;
 }
 
 function buildQuestionSpacerRow(num, bodyHtml, extraClass = 'q-head-row') {
-  return buildQuestionLineTable(num, bodyHtml, extraClass, true);
+  const style = getQuestionHangStyle(num, true);
+  return `<div class="q-hang-line ${extraClass}" style="${style}">${bodyHtml}</div>`;
 }
 
 /** Gambar atas/bawah: sejajar dengan teks setelah nomor (pola grid seperti opsi A.) */
@@ -1500,11 +1507,7 @@ ${kopCss}
 .q-head-txt{flex:0 1 auto;min-width:0;}
 .q-head-block{margin:0 0 0.2em 0;max-width:100%;}
 .q-head-row{margin:0.1em 0;}
-.q-line-table{width:100%;max-width:100%;border-collapse:collapse;border:none;table-layout:fixed;margin:0.1em 0;}
-.q-line-table td{border:none;padding:0;vertical-align:top;}
-.q-num-cell{width:1%;white-space:nowrap;font-weight:700;padding-right:0.35em;vertical-align:top;}
-.q-num-cell.q-num-spacer{visibility:hidden;pointer-events:none;user-select:none;}
-.q-text-cell{text-align:justify;line-height:1.35;word-wrap:break-word;overflow-wrap:break-word;word-break:normal;}
+.q-hang-line{margin:0.1em 0;max-width:100%;box-sizing:border-box;text-align:justify;line-height:1.35;word-wrap:break-word;overflow-wrap:break-word;word-break:normal;}
 .q-num-spacer{visibility:hidden;pointer-events:none;user-select:none;}
 .q-head-img-wrap img{display:block!important;margin:0;height:auto;}
 .q-inline-run img,.q-inline-run .q-img{display:inline-block!important;vertical-align:middle;}
